@@ -15,6 +15,18 @@ git push origin feature/ten-tinh-nang
 
 # Tạo pull request để merge vào main
 
+################################################
+#Tạo branch
+# 1. Chuyển đến thư mục dự án
+cd ten-thu-muc-du-an
+
+# 2. Tạo branch mới (ví dụ: ToHieu, LoginFeature, PaymentModule)
+git checkout -b ToHieu
+
+# 3. Push branch lên remote để mọi người có thể thấy và làm việc
+git push origin ToHieu
+
+
 #####################################################
 #Quy trình merge branch ToHieu vào main
 # 1. Đảm bảo bạn đã commit đầy đủ ở branch ToHieu
