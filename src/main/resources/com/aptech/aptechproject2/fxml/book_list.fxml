@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.BookListController">
+
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15; -fx-background-color: #2c3e50;">
+            <Label text="BOOKAPP" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Đăng xuất" onAction="#onLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" />
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="20" style="-fx-padding: 20;">
+            <Label text="Danh sách sách" style="-fx-font-size: 20;" />
+            <TableView fx:id="bookTable" prefHeight="400">
+                <columns>
+                    <TableColumn fx:id="titleCol" text="Tựa đề" prefWidth="200" />
+                    <TableColumn fx:id="authorCol" text="Tác giả" prefWidth="150" />
+                    <TableColumn fx:id="yearCol" text="Năm XB" prefWidth="80" />
+                    <TableColumn fx:id="genreCol" text="Thể loại" prefWidth="150" />
+                </columns>
+            </TableView>
+            <Button text="Tải lại danh sách" onAction="#loadBooks" />
+        </VBox>
+    </center>
+</BorderPane>

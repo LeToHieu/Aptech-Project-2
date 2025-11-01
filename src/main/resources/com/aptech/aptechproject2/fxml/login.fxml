@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="15" style="-fx-padding: 40; -fx-background-color: #f4f4f4;"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.LoginController">
+
+    <Label text="ĐĂNG NHẬP" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+    <TextField fx:id="emailField" promptText="Email" prefWidth="300" />
+    <PasswordField fx:id="passwordField" promptText="Mật khẩu" prefWidth="300" />
+
+    <Button text="Đăng nhập" onAction="#onLogin" prefWidth="300"
+            style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 14;" />
+
+    <Hyperlink text="Chưa có tài khoản? Đăng ký ngay" onAction="#onRegisterLink" />
+</VBox>

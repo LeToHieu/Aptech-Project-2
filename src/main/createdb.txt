@@ -1,0 +1,117 @@
+-- Tạo database
+CREATE DATABASE IF NOT EXISTS StoryGraph_db
+CHARACTER SET utf8mb4
+COLLATE utf8mb4_unicode_ci;
+
+USE StoryGraph_db;
+
+-- 1. User
+CREATE TABLE User (
+    UserID INT AUTO_INCREMENT PRIMARY KEY,
+    Username VARCHAR(50) NOT NULL UNIQUE,
+    Email VARCHAR(100) NOT NULL UNIQUE,
+    PasswordHash VARCHAR(255) NOT NULL,
+    FullName VARCHAR(100),
+    JoinDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+    AvatarURL VARCHAR(255)
+) ENGINE=InnoDB;
+
+-- 2. Authors
+CREATE TABLE Authors (
+    AuthorID INT AUTO_INCREMENT PRIMARY KEY,
+    AuthorName VARCHAR(100) NOT NULL,
+    BirthYear INT,
+    Nationality VARCHAR(50),
+    Biography TEXT,
+    CONSTRAINT chk_birthyear_range CHECK (BirthYear IS NULL OR (BirthYear >= 0 AND BirthYear <= 9999))
+) ENGINE=InnoDB;
+
+-- 3. Books (AN TOÀN CHO XAMPP - KHÔNG DÙNG HÀM TRONG CHECK)
+CREATE TABLE Books (
+    BookID INT AUTO_INCREMENT PRIMARY KEY,
+    Title VARCHAR(150) NOT NULL,
+    AuthorID INT NOT NULL,
+    PublishedYear INT,
+    Description TEXT,
+    CoverImageURL VARCHAR(255),
+    Language VARCHAR(50) DEFAULT 'Tiếng Việt',
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+
+    CONSTRAINT chk_published_year
+        CHECK (PublishedYear IS NULL OR (PublishedYear >= 0 AND PublishedYear <= 9999)),
+
+    FOREIGN KEY (AuthorID)
+        REFERENCES Authors(AuthorID)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- 4. Genres
+CREATE TABLE Genres (
+    GenreID INT AUTO_INCREMENT PRIMARY KEY,
+    GenreName VARCHAR(50) NOT NULL UNIQUE,
+    Description VARCHAR(255)
+) ENGINE=InnoDB;
+
+-- 5. BookGenres
+CREATE TABLE BookGenres (
+    BookID INT NOT NULL,
+    GenreID INT NOT NULL,
+    PRIMARY KEY (BookID, GenreID),
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (GenreID) REFERENCES Genres(GenreID) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- 6. Reviews
+CREATE TABLE Reviews (
+    ReviewID INT AUTO_INCREMENT PRIMARY KEY,
+    BookID INT NOT NULL,
+    UserID INT NOT NULL,
+    Rating DECIMAL(2,1) NOT NULL CHECK (Rating >= 1.0 AND Rating <= 5.0),
+    Comment TEXT,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY unique_user_book_review (UserID, BookID)
+) ENGINE=InnoDB;
+
+-- 7. UserReadingLists
+CREATE TABLE UserReadingLists (
+    ListID INT AUTO_INCREMENT PRIMARY KEY,
+    UserID INT NOT NULL,
+    ListName VARCHAR(100) NOT NULL,
+    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY unique_user_listname (UserID, ListName)
+) ENGINE=InnoDB;
+
+-- 8. ReadingListBooks
+CREATE TABLE ReadingListBooks (
+    ListID INT NOT NULL,
+    BookID INT NOT NULL,
+    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
+    PRIMARY KEY (ListID, BookID),
+    FOREIGN KEY (ListID) REFERENCES UserReadingLists(ListID) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- 9. BookStats
+CREATE TABLE BookStats (
+    BookID INT PRIMARY KEY,
+    TotalReviews INT DEFAULT 0 CHECK (TotalReviews >= 0),
+    AverageRating DECIMAL(3,2) DEFAULT 0.00 CHECK (AverageRating >= 0 AND AverageRating <= 5.00),
+    LastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB;
+
+-- Thêm tác giả
+INSERT INTO Authors (AuthorName, BirthYear) VALUES ('Nguyễn Nhật Ánh', 1955);
+
+-- Thêm sách
+INSERT INTO Books (Title, AuthorID, PublishedYear) VALUES ('Cho tôi xin một vé đi tuổi thơ', 1, 2008);
+
+-- Thêm thể loại
+INSERT INTO Genres (GenreName) VALUES ('Văn học thiếu nhi'), ('Tình cảm');
+
+-- Liên kết sách với thể loại
+INSERT INTO BookGenres (BookID, GenreID) VALUES (1, 1), (1, 2);
