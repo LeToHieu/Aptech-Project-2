@@ -12,7 +12,7 @@ public class LoginController {
 
     @FXML private TextField emailField;
     @FXML private PasswordField passwordField;
-
+    @FXML private Label errorLabel;
     private final UserDAO userDAO = new UserDAO();
 
     @FXML
@@ -28,7 +28,7 @@ public class LoginController {
         User user = userDAO.getByEmail(email);
         if (user != null && BCrypt.checkpw(password, user.getPasswordHash())) {
             SceneManager.setCurrentUser(user);
-            SceneManager.loadScene("/com/aptech/aptechproject2/fxml/book_list.fxml", emailField.getScene());
+            SceneManager.loadScene("/com/aptech/aptechproject2/fxml/admin_dashboard.fxml", emailField.getScene());
         } else {
             showAlert(Alert.AlertType.ERROR, "Email hoặc mật khẩu sai!");
         }

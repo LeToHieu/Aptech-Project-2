@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.text.Font?>
+
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.AdminDashboardController">
+
+    <!-- TOP BAR -->
+    <top>
+        <HBox alignment="CENTER_LEFT" spacing="20" style="-fx-padding: 15; -fx-background-color: #2c3e50;">
+            <Label text="BOOKAPP ADMIN" style="-fx-font-size: 24; -fx-font-weight: bold; -fx-text-fill: white;" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Button text="Đăng xuất" onAction="#onLogout"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 14;" />
+        </HBox>
+    </top>
+
+    <!-- LEFT MENU -->
+    <left>
+        <VBox style="-fx-background-color: #34495e; -fx-padding: 20;" spacing="10">
+            <Label text="QUẢN LÝ" style="-fx-text-fill: #bdc3c7; -fx-font-size: 14; -fx-font-weight: bold;" />
+
+            <Button fx:id="usersBtn" text=" Người dùng" onAction="#showUsers"
+                    styleClass="menu-btn" prefWidth="200" alignment="CENTER_LEFT">
+                <graphic>
+                    <Label text="[User Icon]" style="-fx-text-fill: white;" />
+                </graphic>
+            </Button>
+
+            <Button fx:id="booksBtn" text=" Sách" onAction="#showBooks"
+                    styleClass="menu-btn" prefWidth="200" alignment="CENTER_LEFT">
+                <graphic>
+                    <Label text="[Book Icon]" style="-fx-text-fill: white;" />
+                </graphic>
+            </Button>
+
+            <Button fx:id="authorsBtn" text=" Tác giả" onAction="#showAuthors"
+                    styleClass="menu-btn" prefWidth="200" alignment="CENTER_LEFT">
+                <graphic>
+                    <Label text="[Author Icon]" style="-fx-text-fill: white;" />
+                </graphic>
+            </Button>
+
+            <Separator style="-fx-background-color: #2c3e50;" />
+
+            <Button text=" Đăng xuất" onAction="#onLogout"
+                    style="-fx-background-color: #e74c3c; -fx-text-fill: white;" prefWidth="200" />
+        </VBox>
+    </left>
+
+    <!-- CENTER: NỘI DUNG ĐỘNG -->
+    <center>
+        <StackPane fx:id="contentArea" style="-fx-padding: 20;">
+            <!-- Nội dung sẽ được load động vào đây -->
+        </StackPane>
+    </center>
+
+</BorderPane>

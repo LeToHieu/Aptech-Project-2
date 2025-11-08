@@ -3,20 +3,39 @@
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
 
-<VBox alignment="CENTER" spacing="15" style="-fx-padding: 40; -fx-background-color: #f4f4f4;"
-      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.aptech.aptechproject2.Controller.RegisterController">
+<VBox alignment="CENTER"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.RegisterController"
+      style="-fx-background-color: #1e272e;">
 
-    <Label text="ĐĂNG KÝ TÀI KHOẢN" style="-fx-font-size: 28; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+    <StackPane maxWidth="360" maxHeight="420" minWidth="360" minHeight="420">
 
-    <TextField fx:id="usernameField" promptText="Tên đăng nhập" prefWidth="300" />
-    <TextField fx:id="emailField" promptText="Email" prefWidth="300" />
-    <TextField fx:id="fullNameField" promptText="Họ tên" prefWidth="300" />
-    <PasswordField fx:id="passwordField" promptText="Mật khẩu" prefWidth="300" />
-    <PasswordField fx:id="confirmPasswordField" promptText="Nhập lại mật khẩu" prefWidth="300" />
+        <VBox spacing="12" alignment="CENTER" prefWidth="360" prefHeight="420"
+              style="-fx-background-color: white;
+                     -fx-background-radius: 18;
+                     -fx-padding: 22;
+                     -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.35), 25, 0, 0, 8);">
 
-    <Button text="Đăng ký" onAction="#onRegister" prefWidth="300"
-            style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 14;" />
+            <Label text="Create Account" style="-fx-font-size: 22; -fx-font-weight: bold;"/>
+            <Label text="Join our bookstore today" style="-fx-text-fill: #636e72;"/>
 
-    <Hyperlink text="Đã có tài khoản? Đăng nhập" onAction="#onLoginLink" />
+            <TextField fx:id="usernameField" promptText="Username" prefHeight="34"/>
+            <TextField fx:id="emailField" promptText="Email" prefHeight="34"/>
+            <PasswordField fx:id="passwordField" promptText="Password" prefHeight="34"/>
+            <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" prefHeight="34"/>
+
+            <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+            <Button text="Sign Up" onAction="#onRegister" prefWidth="300" prefHeight="40"
+                    style="-fx-background-color: #00b894; -fx-text-fill: white;
+                           -fx-font-size: 15; -fx-background-radius: 8;"/>
+
+            <Button text="Already have account? Login" onAction="#onLoginLink"
+                    style="-fx-background-color: transparent; -fx-text-fill: #0984e3; -fx-font-size: 13;"/>
+        </VBox>
+
+    </StackPane>
+
 </VBox>
+

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+<VBox alignment="CENTER"
+      xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+        spacing="15" style="-fx-padding: 10;">
+    <Label text="DANH SÁCH NGƯỜI DÙNG" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+    <TableView fx:id="userTable" prefHeight="500">
+        <columns>
+            <TableColumn text="ID" prefWidth="60">
+                <cellValueFactory><PropertyValueFactory property="userID" /></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Username" prefWidth="150">
+                <cellValueFactory><PropertyValueFactory property="username" /></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Email" prefWidth="200">
+                <cellValueFactory><PropertyValueFactory property="email" /></cellValueFactory>
+            </TableColumn>
+            <TableColumn text="Họ tên" prefWidth="150">
+                <cellValueFactory><PropertyValueFactory property="fullName" /></cellValueFactory>
+            </TableColumn>
+        </columns>
+    </TableView>
+</VBox>

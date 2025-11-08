@@ -8,10 +8,12 @@ import javafx.stage.Stage;
 public class Main extends Application {
     @Override
     public void start(Stage stage) throws Exception {
-        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("fxml/login.fxml"));
+        FXMLLoader fxmlLoader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/login.fxml"));
         Scene scene = new Scene(fxmlLoader.load());
         stage.setTitle("BookApp - Login");
         stage.setScene(scene);
+
+        stage.setMaximized(true); // FULL MÀN
         stage.show();
     }
 

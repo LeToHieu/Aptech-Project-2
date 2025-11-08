@@ -3,6 +3,8 @@ package com.aptech.aptechproject2.DAO;
 import com.aptech.aptechproject2.Model.User;
 import com.aptech.aptechproject2.Ulti.DBUtil;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserDAO {
     public User getByEmail(String email) {
@@ -39,5 +41,28 @@ public class UserDAO {
             e.printStackTrace();
             return false;
         }
+    }
+
+    public List<User> getAllUsers() {
+        List<User> users = new ArrayList<>();
+        String sql = "SELECT * FROM User";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                User user = new User(
+                        rs.getInt("UserID"),
+                        rs.getString("Username"),
+                        rs.getString("Email"),
+                        rs.getString("PasswordHash")
+                );
+                user.setFullName(rs.getString("FullName"));
+                users.add(user);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return users;
     }
 }
