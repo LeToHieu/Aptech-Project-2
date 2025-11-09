@@ -10,10 +10,8 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterController {
 
-    @FXML private TextField usernameField;
-    @FXML private TextField emailField;
-    @FXML private PasswordField passwordField;
-    @FXML private PasswordField confirmPasswordField;
+    @FXML private TextField usernameField, emailField, phoneField; // Thêm phoneField
+    @FXML private PasswordField passwordField, confirmPasswordField;
     @FXML private Label errorLabel;
 
     private final UserDAO userDAO = new UserDAO();
@@ -22,48 +20,48 @@ public class RegisterController {
     private void onRegister(ActionEvent e) {
         String username = usernameField.getText().trim();
         String email = emailField.getText().trim();
+        String phone = phoneField.getText().trim();
         String pass = passwordField.getText();
         String confirm = confirmPasswordField.getText();
 
-        if (username.isEmpty() || email.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
-            errorLabel.setText("❌ Please fill in all fields!");
+        if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
+            errorLabel.setText("❌ Vui lòng điền đầy đủ!");
             return;
         }
 
-        if (!email.matches("^[A-Za-z0-9+_.-]+@(.+)$")) {
-            errorLabel.setText("❌ Invalid email format!");
+        // Kiểm tra trùng
+        if (userDAO.getByUsername(username) != null) {
+            errorLabel.setText("❌ Username đã tồn tại!");
             return;
         }
-
-        if (pass.length() < 6) {
-            errorLabel.setText("❌ Password must be at least 6 characters!");
+        if (userDAO.getByEmail(email) != null) {
+            errorLabel.setText("❌ Email đã tồn tại!");
+            return;
+        }
+        if (userDAO.getByPhone(phone) != null) {
+            errorLabel.setText("❌ SĐT đã tồn tại!");
             return;
         }
 
         if (!pass.equals(confirm)) {
-            errorLabel.setText("❌ Passwords do not match!");
-            return;
-        }
-
-        if (userDAO.getByEmail(email) != null) {
-            errorLabel.setText("❌ Email already exists!");
+            errorLabel.setText("❌ Mật khẩu không khớp!");
             return;
         }
 
         String hash = BCrypt.hashpw(pass, BCrypt.gensalt());
-        User newUser = new User(0, username, email, hash);
+        User newUser = new User(username, email, phone, hash, 2); // Role 2 = User
 
         if (userDAO.create(newUser)) {
-            showAlert(Alert.AlertType.INFORMATION, "Register successful!");
-            SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", emailField.getScene());
+            showAlert(Alert.AlertType.INFORMATION, "Đăng ký thành công!");
+            SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", usernameField.getScene());
         } else {
-            errorLabel.setText("❌ Register failed, try again!");
+            errorLabel.setText("❌ Đăng ký thất bại!");
         }
     }
 
     @FXML
     private void onLoginLink(ActionEvent e) {
-        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", emailField.getScene());
+        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", usernameField.getScene());
     }
 
     private void showAlert(Alert.AlertType type, String msg) {

@@ -1,27 +1,34 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
-
 <?import javafx.scene.control.cell.PropertyValueFactory?>
-<VBox alignment="CENTER"
-      xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-        spacing="15" style="-fx-padding: 10;">
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.UserListController">
+
+    <center>
+
+<VBox spacing="20" style="-fx-padding: 10;">
     <Label text="DANH SÁCH NGƯỜI DÙNG" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <TextField fx:id="searchField" promptText="Tìm theo tên/email" prefWidth="300"/>
+        <Button fx:id="searchBtn" text="Tìm" onAction="#onSearch"/>
+        <Region HBox.hgrow="ALWAYS"/>
+        <Button fx:id="addBtn" text="Thêm" onAction="#onAdd"/>
+        <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
+        <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
+    </HBox>
     <TableView fx:id="userTable" prefHeight="500">
         <columns>
-            <TableColumn text="ID" prefWidth="60">
-                <cellValueFactory><PropertyValueFactory property="userID" /></cellValueFactory>
-            </TableColumn>
-            <TableColumn text="Username" prefWidth="150">
-                <cellValueFactory><PropertyValueFactory property="username" /></cellValueFactory>
-            </TableColumn>
-            <TableColumn text="Email" prefWidth="200">
-                <cellValueFactory><PropertyValueFactory property="email" /></cellValueFactory>
-            </TableColumn>
-            <TableColumn text="Họ tên" prefWidth="150">
-                <cellValueFactory><PropertyValueFactory property="fullName" /></cellValueFactory>
-            </TableColumn>
+            <TableColumn fx:id="idCol" text="Id" prefWidth="200" />
+            <TableColumn fx:id="usernameCol" text="Tên" prefWidth="150" />
+            <TableColumn fx:id="emailCol" text="Email" prefWidth="80" />
+            <TableColumn fx:id="roleCol" text="Role" prefWidth="50" />
+            <TableColumn fx:id="phoneCol" text="Role" prefWidth="50" />
+            <TableColumn fx:id="dateCol" text="Ngày tạo" prefWidth="100" />
         </columns>
     </TableView>
 </VBox>
+    </center>
+
+</BorderPane>

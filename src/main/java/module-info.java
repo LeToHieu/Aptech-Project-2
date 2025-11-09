@@ -11,8 +11,9 @@ module com.aptech.aptechproject2 {
     requires java.sql;
     requires jbcrypt;
 
-    opens com.aptech.aptechproject2 to javafx.fxml;
-    opens com.aptech.aptechproject2.Controller to javafx.fxml;
-    opens com.aptech.aptechproject2.Model to javafx.fxml; // nếu dùng FXML binding
+    opens com.aptech.aptechproject2 to javafx.fxml, javafx.base;
+    opens com.aptech.aptechproject2.Controller to javafx.fxml, javafx.base;
+    opens com.aptech.aptechproject2.Model to javafx.fxml, javafx.base; // nếu dùng FXML binding
+//    opens com.aptech.aptechproject2.Model.Book to javafx.fxml;
     exports com.aptech.aptechproject2;
 }

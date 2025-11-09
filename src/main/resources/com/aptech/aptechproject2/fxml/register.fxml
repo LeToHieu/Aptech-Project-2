@@ -22,6 +22,7 @@
 
             <TextField fx:id="usernameField" promptText="Username" prefHeight="34"/>
             <TextField fx:id="emailField" promptText="Email" prefHeight="34"/>
+            <TextField fx:id="phoneField" promptText="Phone Number" prefHeight="34"/>
             <PasswordField fx:id="passwordField" promptText="Password" prefHeight="34"/>
             <PasswordField fx:id="confirmPasswordField" promptText="Confirm Password" prefHeight="34"/>
 

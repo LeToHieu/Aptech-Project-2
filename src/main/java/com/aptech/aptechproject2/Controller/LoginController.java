@@ -10,33 +10,41 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class LoginController {
 
-    @FXML private TextField emailField;
+    @FXML private TextField usernameField; // Đổi từ emailField → usernameField
     @FXML private PasswordField passwordField;
     @FXML private Label errorLabel;
     private final UserDAO userDAO = new UserDAO();
 
     @FXML
     private void onLogin(ActionEvent e) {
-        String email = emailField.getText().trim();
+        String username = usernameField.getText().trim();
         String password = passwordField.getText();
 
-        if (email.isEmpty() || password.isEmpty()) {
+        if (username.isEmpty() || password.isEmpty()) {
             showAlert(Alert.AlertType.ERROR, "Vui lòng nhập đầy đủ!");
             return;
         }
 
-        User user = userDAO.getByEmail(email);
-        if (user != null && BCrypt.checkpw(password, user.getPasswordHash())) {
+        User user = userDAO.getByUsername(username);
+        if (user != null && BCrypt.checkpw(password, user.getPassword())) {
             SceneManager.setCurrentUser(user);
-            SceneManager.loadScene("/com/aptech/aptechproject2/fxml/admin_dashboard.fxml", emailField.getScene());
+            // Phân trang theo role
+            int role = user.getRole();
+            if (role == 0 || role == 1) {
+                SceneManager.loadScene("/com/aptech/aptechproject2/fxml/admin_dashboard.fxml", usernameField.getScene());
+            } else if (role == 2) {
+                SceneManager.loadScene("/com/aptech/aptechproject2/fxml/user_dashboard.fxml", usernameField.getScene());
+            } else {
+                showAlert(Alert.AlertType.ERROR, "Vai trò không hợp lệ!");
+            }
         } else {
-            showAlert(Alert.AlertType.ERROR, "Email hoặc mật khẩu sai!");
+            showAlert(Alert.AlertType.ERROR, "Username hoặc mật khẩu sai!");
         }
     }
 
     @FXML
     private void onRegisterLink(ActionEvent e) {
-        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/register.fxml", emailField.getScene());
+        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/register.fxml", usernameField.getScene());
     }
 
     private void showAlert(Alert.AlertType type, String message) {

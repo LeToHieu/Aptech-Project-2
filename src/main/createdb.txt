@@ -1,9 +1,9 @@
 -- Tạo database
-CREATE DATABASE IF NOT EXISTS StoryGraph_db
+CREATE DATABASE IF NOT EXISTS StoryGraph_db2
 CHARACTER SET utf8mb4
 COLLATE utf8mb4_unicode_ci;
 
-USE StoryGraph_db;
+USE StoryGraph_db2;
 
 -- 1. User
 CREATE TABLE User (

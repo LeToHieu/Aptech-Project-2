@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox alignment="CENTER" spacing="20" style="-fx-padding: 40; -fx-background-color: #f8f9fa;"
+      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController">
+
+    <Label text="Chào mừng bạn đến BookApp!" style="-fx-font-size: 28; -fx-font-weight: bold;"/>
+    <Label fx:id="welcomeLabel" style="-fx-font-size: 18;"/>
+
+    <HBox spacing="20">
+        <Button text="Xem sách" prefWidth="200" prefHeight="50"
+                style="-fx-background-color: #0984e3; -fx-text-fill: white; -fx-font-size: 16;"
+                onAction="#showBooks"/>
+        <Button text="Đăng xuất" prefWidth="200" prefHeight="50"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16;"
+                onAction="#onLogout"/>
+    </HBox>
+</VBox>

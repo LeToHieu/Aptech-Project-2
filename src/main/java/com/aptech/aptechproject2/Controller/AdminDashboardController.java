@@ -17,8 +17,9 @@ public class AdminDashboardController {
 
     @FXML
     private void initialize() {
-        showBooks();
-        setActiveButton(booksBtn);
+//        showBooks();
+        showUsers();
+        setActiveButton(usersBtn);
     }
 
     @FXML private void showUsers()   { loadContent("/com/aptech/aptechproject2/fxml/user_list.fxml");   setActiveButton(usersBtn); }

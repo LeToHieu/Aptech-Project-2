@@ -21,7 +21,7 @@
             <Label text="Welcome Back" style="-fx-font-size: 24; -fx-font-weight: bold;"/>
             <Label text="Login to your account" style="-fx-text-fill: #636e72;"/>
 
-            <TextField fx:id="emailField" promptText="Email" prefHeight="38"
+            <TextField fx:id="usernameField" promptText="User Name" prefHeight="38"
                        style="-fx-background-radius: 8; -fx-border-radius: 8; -fx-border-color: #dfe6e9;" />
 
             <PasswordField fx:id="passwordField" promptText="Password" prefHeight="38"
