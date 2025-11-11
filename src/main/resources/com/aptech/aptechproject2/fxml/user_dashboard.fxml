@@ -1,20 +1,30 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
+<?import javafx.scene.text.*?>
 
-<VBox alignment="CENTER" spacing="20" style="-fx-padding: 40; -fx-background-color: #f8f9fa;"
-      xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController">
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController"
+      spacing="10" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
 
-    <Label text="Chào mừng bạn đến BookApp!" style="-fx-font-size: 28; -fx-font-weight: bold;"/>
-    <Label fx:id="welcomeLabel" style="-fx-font-size: 18;"/>
-
-    <HBox spacing="20">
-        <Button text="Xem sách" prefWidth="200" prefHeight="50"
-                style="-fx-background-color: #0984e3; -fx-text-fill: white; -fx-font-size: 16;"
-                onAction="#showBooks"/>
-        <Button text="Đăng xuất" prefWidth="200" prefHeight="50"
-                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16;"
-                onAction="#onLogout"/>
+    <!-- Header -->
+    <HBox spacing="10">
+        <TextField fx:id="searchField" promptText="Tìm kiếm sách..." HBox.hgrow="ALWAYS"/>
+        <Button text="Tìm kiếm" onAction="#onSearch"/>
     </HBox>
+
+    <!-- Action buttons -->
+    <HBox spacing="10">
+        <Button text="Thể loại sách" onAction="#onViewCategories"/>
+        <Button text="Các tác giả" onAction="#onViewAuthors"/>
+        <Button text="Tất cả sách" onAction="#onViewAllBooks"/>
+        <Button text="Thông tin người dùng" onAction="#onViewUserInfo"/>
+        <Button text="Đăng xuất" onAction="#onLogout"/>
+    </HBox>
+
+    <!-- Books grid -->
+    <ScrollPane fitToWidth="true">
+        <GridPane fx:id="booksGrid" hgap="20" vgap="20"/>
+    </ScrollPane>
 </VBox>

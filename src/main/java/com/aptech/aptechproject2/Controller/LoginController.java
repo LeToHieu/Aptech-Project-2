@@ -3,6 +3,7 @@ package com.aptech.aptechproject2.Controller;
 import com.aptech.aptechproject2.DAO.UserDAO;
 import com.aptech.aptechproject2.Model.User;
 import com.aptech.aptechproject2.Ulti.SceneManager;
+import com.aptech.aptechproject2.Ulti.Session; // Thêm import này để sử dụng Session
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
@@ -27,12 +28,12 @@ public class LoginController {
 
         User user = userDAO.getByUsername(username);
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
-            SceneManager.setCurrentUser(user);
-            // Phân trang theo role
+            Session.setCurrentUser(user); // Sửa từ SceneManager → Session (đồng bộ với Dashboard)
+            // Phân trang theo role (sửa logic cho đúng với getRoleName: 1=Admin → admin_dashboard, 0=User hoặc 2=Librarian → user_dashboard)
             int role = user.getRole();
-            if (role == 0 || role == 1) {
+            if (role == 1) {
                 SceneManager.loadScene("/com/aptech/aptechproject2/fxml/admin_dashboard.fxml", usernameField.getScene());
-            } else if (role == 2) {
+            } else if (role == 0 || role == 2) {
                 SceneManager.loadScene("/com/aptech/aptechproject2/fxml/user_dashboard.fxml", usernameField.getScene());
             } else {
                 showAlert(Alert.AlertType.ERROR, "Vai trò không hợp lệ!");

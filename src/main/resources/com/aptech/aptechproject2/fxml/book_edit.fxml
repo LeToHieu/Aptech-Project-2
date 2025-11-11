@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.EditBookController"
+      spacing="10" prefWidth="400" prefHeight="400" style="-fx-padding: 20; -fx-background-color: white;">
+
+    <Label text="Sửa Thông Tin Sách" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <Label text="Tựa đề:"/>
+    <TextField fx:id="titleField" promptText="Title"/>
+
+    <Label text="Mô tả:"/>
+    <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
+
+    <Label text="Image (đường dẫn):"/>
+    <TextField fx:id="imageField" promptText="Image path"/>
+
+    <Label text="URL:"/>
+    <TextField fx:id="urlField" promptText="URL"/>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdateBook"/>
+        <Button text="Hủy" onAction="#onCancel"/>
+    </HBox>
+</VBox>

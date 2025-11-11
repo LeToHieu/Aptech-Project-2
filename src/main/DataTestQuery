@@ -1,0 +1,481 @@
+-- phpMyAdmin SQL Dump
+-- version 5.2.1
+-- https://www.phpmyadmin.net/
+--
+-- Máy chủ: 127.0.0.1
+-- Thời gian đã tạo: Th10 10, 2025 lúc 03:56 PM
+-- Phiên bản máy phục vụ: 10.4.32-MariaDB
+-- Phiên bản PHP: 8.0.30
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+00:00";
+
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!40101 SET NAMES utf8mb4 */;
+
+--
+-- Cơ sở dữ liệu: `storygraph_db`
+--
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `author`
+--
+
+CREATE TABLE `author` (
+  `Id` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Image` varchar(500) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `author`
+--
+
+INSERT INTO `author` (`Id`, `Name`, `Description`, `Image`) VALUES
+(1, 'Nguyễn Nhật Ánh', 'Nhà văn Việt Nam với nhiều tác phẩm viết cho tuổi thơ.', 'images/Nguyễn Nhật Ánh.jpg'),
+(2, 'Yuval Noah Harari', 'Nhà sử học và triết gia người Israel, tác giả của Sapiens và Homo Deus.', 'images/Yuval Noah Harari.jpg'),
+(3, 'Dale Carnegie', 'Nhà văn, diễn giả người Mỹ, tác giả của \"Đắc Nhân Tâm\".', 'images/Dale Carnegie.jpg'),
+(4, 'Paulo Coelho', 'Nhà văn người Brazil, nổi tiếng với \"Nhà Giả Kim\".', 'images/Paulo Coelho.jpg'),
+(5, 'Nguyễn Nhật Ánh', 'Nhà văn Việt Nam với nhiều tác phẩm viết cho tuổi thơ.', 'images/Nguyễn Nhật Ánh.jpg'),
+(6, 'Yuval Noah Harari', 'Nhà sử học và triết gia người Israel, tác giả của Sapiens và Homo Deus.', 'images/Yuval Noah Harari.jpg'),
+(7, 'J.K. Rowling', 'Tác giả người Anh, nổi tiếng với loạt truyện Harry Potter.', 'images/J.K. Rowling.jpg'),
+(8, 'George Orwell', 'Nhà văn người Anh, tác giả của 1984 và Animal Farm.', 'images/George Orwell.jpg'),
+(9, 'Mark Manson', 'Tác giả người Mỹ chuyên viết về phát triển bản thân.', 'images/Mark Manson.jpg'),
+(10, 'Napoleon Hill', 'Nhà văn và diễn giả người Mỹ về lĩnh vực thành công cá nhân.', 'images/Napoleon Hill.jpg'),
+(11, 'James Clear', 'Chuyên gia về thói quen và năng suất cá nhân.', 'images/James Clear.jpg'),
+(12, 'Morgan Housel', 'Nhà văn và nhà đầu tư người Mỹ.', 'images/Morgan Housel.jpg'),
+(13, 'Frank Herbert', 'Nhà văn Mỹ nổi tiếng với tác phẩm khoa học viễn tưởng Dune.', 'images/Frank Herbert.jpg');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `book`
+--
+
+CREATE TABLE `book` (
+  `Id` int(11) NOT NULL,
+  `Title` varchar(255) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `Image` varchar(500) DEFAULT NULL,
+  `Url` varchar(500) DEFAULT NULL,
+  `CreateTime` timestamp NOT NULL DEFAULT current_timestamp(),
+  `UpdateTime` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `book`
+--
+
+INSERT INTO `book` (`Id`, `Title`, `Description`, `Image`, `Url`, `CreateTime`, `UpdateTime`) VALUES
+(1, 'Cho Tôi Xin Một Vé Đi Tuổi Thơ', 'Hồi ức tuổi thơ', 'images/ChoToiXinMotVeDiTuoiTho.jpg', NULL, '2025-11-09 20:32:59', '2025-11-10 14:51:03'),
+(2, 'Sapiens', 'Lược sử loài người', 'images/Sapiens.jpg', NULL, '2025-11-09 20:32:59', '2025-11-09 22:58:46'),
+(3, 'Đắc Nhân Tâm', 'Cuốn sách kinh điển về nghệ thuật giao tiếp và thuyết phục của Dale Carnegie.', 'images/Đắc Nhân Tâm.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 22:59:59'),
+(4, 'Nhà Giả Kim', 'Hành trình đi tìm ước mơ đầy triết lý của chàng chăn cừu Santiago.', 'images/Nhà Giả Kim.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:00:31'),
+(5, 'Tôi Thấy Hoa Vàng Trên Cỏ Xanh', 'Tác phẩm nổi tiếng của Nguyễn Nhật Ánh viết về tuổi thơ và tình cảm gia đình.', 'images/ToiThayHoaVangTrenCoXanh.jpg', NULL, '2025-11-09 22:47:34', '2025-11-10 14:50:14'),
+(6, 'Sapiens: Lược Sử Loài Người', 'Khám phá quá trình tiến hóa và hình thành xã hội loài người.', 'images/Sapiens Lược Sử Loài Người.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:02:18'),
+(7, 'Homo Deus: Lược Sử Tương Lai', 'Dự đoán về tương lai loài người khi công nghệ phát triển.', 'images/Homo Deus Lược Sử Tương Lai.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:02:56'),
+(8, '21 Bài Học Cho Thế Kỷ 21', 'Những vấn đề lớn của thế giới hiện đại.', 'images/21 Bài Học Cho Thế Kỷ 21.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:04:23'),
+(9, 'Harry Potter và Hòn Đá Phù Thủy', 'Cuốn đầu tiên trong loạt truyện nổi tiếng Harry Potter.', 'images/Harry Potter và Hòn Đá Phù Thủy.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:04:46'),
+(10, 'Harry Potter và Chiếc Cốc Lửa', 'Cuộc thi Tam Pháp Thuật và bóng đen Voldemort trở lại.', 'images/Harry Potter và Chiếc Cốc Lửa.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:05:09'),
+(11, '1984', 'Tác phẩm dystopia kinh điển của George Orwell, nói về xã hội bị kiểm soát toàn diện.', 'images/1984.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:05:50'),
+(12, 'Animal Farm', 'Ngụ ngôn chính trị phản ánh chế độ độc tài.', 'images/Animal Farm.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:06:48'),
+(13, 'The Subtle Art of Not Giving a F*ck', 'Cách sống thực tế, tập trung vào điều quan trọng.', 'images/The Subtle Art of Not Giving a Fuck.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:08:21'),
+(14, 'Think and Grow Rich', 'Tác phẩm kinh điển về tư duy và thành công của Napoleon Hill.', 'images/Think and Grow Rich.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:08:42'),
+(15, 'Atomic Habits', 'James Clear hướng dẫn cách xây dựng thói quen tốt.', 'images/Atomic Habits.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:09:18'),
+(16, 'The Psychology of Money', 'Morgan Housel bàn về tâm lý tài chính và đầu tư.', 'images/The Psychology of Money.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:09:34'),
+(17, 'Dune', 'Tác phẩm viễn tưởng nổi tiếng của Frank Herbert.', 'images/Dune.jpg', NULL, '2025-11-09 22:47:34', '2025-11-09 23:10:21');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `bookauthor`
+--
+
+CREATE TABLE `bookauthor` (
+  `BookId` int(11) NOT NULL,
+  `AuthorId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `bookauthor`
+--
+
+INSERT INTO `bookauthor` (`BookId`, `AuthorId`) VALUES
+(3, 3),
+(4, 4),
+(5, 5),
+(6, 6),
+(7, 6),
+(8, 6),
+(9, 7),
+(10, 7),
+(11, 8),
+(12, 8),
+(13, 9),
+(14, 10),
+(15, 11),
+(16, 12),
+(17, 13);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `bookcategory`
+--
+
+CREATE TABLE `bookcategory` (
+  `BookId` int(11) NOT NULL,
+  `CategoryId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `bookcategory`
+--
+
+INSERT INTO `bookcategory` (`BookId`, `CategoryId`) VALUES
+(3, 8),
+(4, 6),
+(5, 1),
+(6, 2),
+(7, 2),
+(8, 2),
+(9, 7),
+(10, 7),
+(11, 6),
+(12, 6),
+(13, 4),
+(14, 5),
+(15, 8),
+(16, 5),
+(17, 7);
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `bookshelves`
+--
+
+CREATE TABLE `bookshelves` (
+  `ShelvesId` int(11) NOT NULL,
+  `BookId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `borrow`
+--
+
+CREATE TABLE `borrow` (
+  `Id` int(11) NOT NULL,
+  `BorrowDay` timestamp NOT NULL DEFAULT current_timestamp(),
+  `ExpireDay` timestamp NOT NULL DEFAULT '2038-01-18 20:14:07',
+  `ReturnDateTime` timestamp NULL DEFAULT NULL,
+  `UserId` int(11) NOT NULL,
+  `BookId` int(11) NOT NULL,
+  `Status` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0=Đang mượn, 1=Đã trả, 2=Quá hạn'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Bẫy `borrow`
+--
+DELIMITER $$
+CREATE TRIGGER `trg_set_expire_day` BEFORE INSERT ON `borrow` FOR EACH ROW BEGIN
+    IF NEW.ExpireDay = '2038-01-19 03:14:07' THEN
+        SET NEW.ExpireDay = DATE_ADD(NEW.BorrowDay, INTERVAL 14 DAY);
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `category`
+--
+
+CREATE TABLE `category` (
+  `Id` int(11) NOT NULL,
+  `Name` varchar(100) NOT NULL,
+  `Description` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `category`
+--
+
+INSERT INTO `category` (`Id`, `Name`, `Description`) VALUES
+(1, 'Tiểu thuyết', NULL),
+(2, 'Khoa học', NULL),
+(3, 'Lịch sử', NULL),
+(4, 'Tâm lý học', 'Các tác phẩm về tâm lý và phát triển bản thân'),
+(5, 'Kinh doanh', 'Sách về kinh tế, quản lý, marketing'),
+(6, 'Văn học nước ngoài', 'Tác phẩm văn học nổi tiếng thế giới'),
+(7, 'Giả tưởng', 'Truyện khoa học viễn tưởng, fantasy'),
+(8, 'Kỹ năng sống', 'Sách hướng dẫn kỹ năng sống và giao tiếp');
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `review`
+--
+
+CREATE TABLE `review` (
+  `Id` int(11) NOT NULL,
+  `UserId` int(11) NOT NULL,
+  `BookId` int(11) NOT NULL,
+  `Rating` decimal(3,2) DEFAULT NULL CHECK (`Rating` >= 0 and `Rating` <= 5),
+  `Comment` text DEFAULT NULL,
+  `CreateTime` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `shelves`
+--
+
+CREATE TABLE `shelves` (
+  `Id` int(11) NOT NULL,
+  `Name` varchar(255) NOT NULL,
+  `UserId` int(11) NOT NULL,
+  `Description` text DEFAULT NULL,
+  `CreateTime` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `toprate`
+--
+
+CREATE TABLE `toprate` (
+  `UserId` int(11) NOT NULL,
+  `BookId` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Cấu trúc bảng cho bảng `user`
+--
+
+CREATE TABLE `user` (
+  `Id` int(11) NOT NULL,
+  `UserName` varchar(100) NOT NULL,
+  `Email` varchar(255) NOT NULL,
+  `PhoneNumber` bigint(20) DEFAULT NULL,
+  `Password` varchar(255) NOT NULL,
+  `Role` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0=User, 1=Admin, 2=Librarian',
+  `CreateTime` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `user`
+--
+
+INSERT INTO `user` (`Id`, `UserName`, `Email`, `PhoneNumber`, `Password`, `Role`, `CreateTime`) VALUES
+(1, 'admin', 'admin@library.com', 901234567, 'admin123', 1, '2025-11-09 20:32:58'),
+(2, 'john_doe', 'john@example.com', 901234568, 'user123', 0, '2025-11-09 20:32:58'),
+(3, 'admin1', 'admin1@gmail.com', 123456789, '$2a$10$C/oOJ5hHTs5A2t1hPN.jEOrC/ZmsIttpMaBRme2I3wK8HF0fyvJ5W', 1, '2025-11-09 20:42:54'),
+(4, 'Vu Duc Huy', 'huy@gmail.com', 965904537, '$2a$10$zyxOciU55ycbobU1UELL5OQ8dya5X60vjv9dZN4wKkbbfSPUdGRdq', 2, '2025-11-09 21:20:12');
+
+--
+-- Chỉ mục cho các bảng đã đổ
+--
+
+--
+-- Chỉ mục cho bảng `author`
+--
+ALTER TABLE `author`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `idx_author_name` (`Name`);
+
+--
+-- Chỉ mục cho bảng `book`
+--
+ALTER TABLE `book`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `idx_title` (`Title`);
+ALTER TABLE `book` ADD FULLTEXT KEY `idx_search` (`Title`,`Description`);
+
+--
+-- Chỉ mục cho bảng `bookauthor`
+--
+ALTER TABLE `bookauthor`
+  ADD PRIMARY KEY (`BookId`,`AuthorId`),
+  ADD KEY `AuthorId` (`AuthorId`);
+
+--
+-- Chỉ mục cho bảng `bookcategory`
+--
+ALTER TABLE `bookcategory`
+  ADD PRIMARY KEY (`BookId`,`CategoryId`),
+  ADD KEY `CategoryId` (`CategoryId`);
+
+--
+-- Chỉ mục cho bảng `bookshelves`
+--
+ALTER TABLE `bookshelves`
+  ADD PRIMARY KEY (`ShelvesId`,`BookId`),
+  ADD KEY `BookId` (`BookId`);
+
+--
+-- Chỉ mục cho bảng `borrow`
+--
+ALTER TABLE `borrow`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `BookId` (`BookId`),
+  ADD KEY `idx_user_status` (`UserId`,`Status`),
+  ADD KEY `idx_expire_status` (`ExpireDay`,`Status`),
+  ADD KEY `idx_borrowday` (`BorrowDay`);
+
+--
+-- Chỉ mục cho bảng `category`
+--
+ALTER TABLE `category`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `Name` (`Name`),
+  ADD KEY `idx_category_name` (`Name`);
+
+--
+-- Chỉ mục cho bảng `review`
+--
+ALTER TABLE `review`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `uniq_user_book` (`UserId`,`BookId`),
+  ADD KEY `idx_book_rating` (`BookId`,`Rating`);
+
+--
+-- Chỉ mục cho bảng `shelves`
+--
+ALTER TABLE `shelves`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `idx_user_shelves` (`UserId`);
+
+--
+-- Chỉ mục cho bảng `toprate`
+--
+ALTER TABLE `toprate`
+  ADD PRIMARY KEY (`UserId`,`BookId`),
+  ADD KEY `BookId` (`BookId`);
+
+--
+-- Chỉ mục cho bảng `user`
+--
+ALTER TABLE `user`
+  ADD PRIMARY KEY (`Id`),
+  ADD UNIQUE KEY `UserName` (`UserName`),
+  ADD UNIQUE KEY `Email` (`Email`),
+  ADD KEY `idx_email` (`Email`),
+  ADD KEY `idx_username` (`UserName`);
+
+--
+-- AUTO_INCREMENT cho các bảng đã đổ
+--
+
+--
+-- AUTO_INCREMENT cho bảng `author`
+--
+ALTER TABLE `author`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT cho bảng `book`
+--
+ALTER TABLE `book`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+
+--
+-- AUTO_INCREMENT cho bảng `borrow`
+--
+ALTER TABLE `borrow`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `category`
+--
+ALTER TABLE `category`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+
+--
+-- AUTO_INCREMENT cho bảng `review`
+--
+ALTER TABLE `review`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `shelves`
+--
+ALTER TABLE `shelves`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT cho bảng `user`
+--
+ALTER TABLE `user`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- Các ràng buộc cho các bảng đã đổ
+--
+
+--
+-- Các ràng buộc cho bảng `bookauthor`
+--
+ALTER TABLE `bookauthor`
+  ADD CONSTRAINT `bookauthor_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `bookauthor_ibfk_2` FOREIGN KEY (`AuthorId`) REFERENCES `author` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `bookcategory`
+--
+ALTER TABLE `bookcategory`
+  ADD CONSTRAINT `bookcategory_ibfk_1` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `bookcategory_ibfk_2` FOREIGN KEY (`CategoryId`) REFERENCES `category` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `bookshelves`
+--
+ALTER TABLE `bookshelves`
+  ADD CONSTRAINT `bookshelves_ibfk_1` FOREIGN KEY (`ShelvesId`) REFERENCES `shelves` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `bookshelves_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `borrow`
+--
+ALTER TABLE `borrow`
+  ADD CONSTRAINT `borrow_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`Id`) ON UPDATE CASCADE,
+  ADD CONSTRAINT `borrow_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `review`
+--
+ALTER TABLE `review`
+  ADD CONSTRAINT `review_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `review_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `shelves`
+--
+ALTER TABLE `shelves`
+  ADD CONSTRAINT `shelves_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `toprate`
+--
+ALTER TABLE `toprate`
+  ADD CONSTRAINT `toprate_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+  ADD CONSTRAINT `toprate_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
+COMMIT;
+
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;

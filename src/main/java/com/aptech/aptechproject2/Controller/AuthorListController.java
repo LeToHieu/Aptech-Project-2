@@ -1,10 +1,9 @@
 package com.aptech.aptechproject2.Controller;
 
-import com.aptech.aptechproject2.DAO.BookDAO;
-import com.aptech.aptechproject2.Model.Book;
+import com.aptech.aptechproject2.DAO.AuthorDAO;
+import com.aptech.aptechproject2.Model.Author;
 import com.aptech.aptechproject2.Ulti.SceneManager;
 import com.aptech.aptechproject2.Ulti.Session;
-import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -16,49 +15,44 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
-import java.util.List;
 import java.util.stream.Collectors;
 
-public class BookListController {
+public class AuthorListController {
 
-    @FXML private TableView<Book> bookTable;
-    @FXML private TableColumn<Book, Integer> idCol;
-    @FXML private TableColumn<Book, String> titleCol, descriptionCol, imageCol, urlCol, createTimeCol, updateTimeCol;
+    @FXML private TableView<Author> authorTable;
+    @FXML private TableColumn<Author, Integer> idCol;
+    @FXML private TableColumn<Author, String> nameCol, descriptionCol, imageCol;
     @FXML private TextField searchField;
     @FXML private Button addBtn, editBtn, deleteBtn;
 
-    private final BookDAO bookDAO = new BookDAO();
-    private ObservableList<Book> allBooks = FXCollections.observableArrayList();
-    private ObservableList<Book> filteredBooks = FXCollections.observableArrayList();
+    private final AuthorDAO authorDAO = new AuthorDAO();
+    private ObservableList<Author> allAuthors = FXCollections.observableArrayList();
+    private ObservableList<Author> filteredAuthors = FXCollections.observableArrayList();
 
     @FXML
     private void initialize() {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
-        titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
+        nameCol.setCellValueFactory(new PropertyValueFactory<>("name"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
         imageCol.setCellValueFactory(new PropertyValueFactory<>("image"));
-        urlCol.setCellValueFactory(new PropertyValueFactory<>("url"));
-        createTimeCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCreateTime().toString()));
-        updateTimeCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUpdateTime().toString()));
 
-        loadBooks();
-        searchField.textProperty().addListener((obs, old, newVal) -> filterBooks(newVal));
+        loadAuthors();
+        searchField.textProperty().addListener((obs, old, newVal) -> filterAuthors(newVal));
     }
 
-    private void loadBooks() {
-        List<Book> books = bookDAO.getAllBooks();
-        allBooks.setAll(books);
-        filteredBooks.setAll(allBooks);
-        bookTable.setItems(filteredBooks);
+    private void loadAuthors() {
+        allAuthors.setAll(authorDAO.getAllAuthors());
+        filteredAuthors.setAll(allAuthors);
+        authorTable.setItems(filteredAuthors);
     }
 
-    private void filterBooks(String keyword) {
+    private void filterAuthors(String keyword) {
         if (keyword == null || keyword.isEmpty()) {
-            filteredBooks.setAll(allBooks);
+            filteredAuthors.setAll(allAuthors);
         } else {
-            filteredBooks.setAll(allBooks.stream()
-                    .filter(b -> b.getTitle().toLowerCase().contains(keyword.toLowerCase()) ||
-                            (b.getDescription() != null && b.getDescription().toLowerCase().contains(keyword.toLowerCase())))
+            filteredAuthors.setAll(allAuthors.stream()
+                    .filter(a -> a.getName().toLowerCase().contains(keyword.toLowerCase()) ||
+                            (a.getDescription() != null && a.getDescription().toLowerCase().contains(keyword.toLowerCase())))
                     .collect(Collectors.toList()));
         }
     }
@@ -67,20 +61,20 @@ public class BookListController {
     private void onAdd() {
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận");
-        confirm.setContentText("Bạn có chắc chắn muốn thêm sách mới?");
+        confirm.setContentText("Bạn có chắc chắn muốn thêm tác giả mới?");
         if (confirm.showAndWait().get() != ButtonType.OK) {
             return;
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/book_add.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/author_add.fxml"));
             Scene scene = new Scene(loader.load());
             Stage stage = new Stage();
-            stage.setTitle("Thêm Sách");
+            stage.setTitle("Thêm Tác Giả");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-            loadBooks();
+            loadAuthors();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -88,33 +82,33 @@ public class BookListController {
 
     @FXML
     private void onEdit() {
-        Book selected = bookTable.getSelectionModel().getSelectedItem();
+        Author selected = authorTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Cảnh báo");
-            alert.setContentText("Vui lòng chọn một sách để sửa!");
+            alert.setContentText("Vui lòng chọn một tác giả để sửa!");
             alert.showAndWait();
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận");
-        confirm.setContentText("Bạn có chắc chắn muốn sửa sách này?");
+        confirm.setContentText("Bạn có chắc chắn muốn sửa tác giả này?");
         if (confirm.showAndWait().get() != ButtonType.OK) {
             return;
         }
 
         try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/book_edit.fxml"));
+            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/author_edit.fxml"));
             Scene scene = new Scene(loader.load());
-            EditBookController controller = loader.getController();
-            controller.setBook(selected);
+            EditAuthorController controller = loader.getController();
+            controller.setAuthor(selected);
             Stage stage = new Stage();
-            stage.setTitle("Sửa Sách");
+            stage.setTitle("Sửa Tác Giả");
             stage.setScene(scene);
             stage.initModality(Modality.APPLICATION_MODAL);
             stage.showAndWait();
-            loadBooks();
+            loadAuthors();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -122,25 +116,25 @@ public class BookListController {
 
     @FXML
     private void onDelete() {
-        Book selected = bookTable.getSelectionModel().getSelectedItem();
+        Author selected = authorTable.getSelectionModel().getSelectedItem();
         if (selected == null) {
             Alert alert = new Alert(Alert.AlertType.WARNING);
             alert.setTitle("Cảnh báo");
-            alert.setContentText("Vui lòng chọn một sách để xóa!");
+            alert.setContentText("Vui lòng chọn một tác giả để xóa!");
             alert.showAndWait();
             return;
         }
 
         Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
         confirm.setTitle("Xác nhận xóa");
-        confirm.setContentText("Bạn có chắc chắn muốn xóa sách này?");
+        confirm.setContentText("Bạn có chắc chắn muốn xóa tác giả này?");
         if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (bookDAO.delete(selected.getId())) {
-                loadBooks();
+            if (authorDAO.delete(selected.getId())) {
+                loadAuthors();
             } else {
                 Alert error = new Alert(Alert.AlertType.ERROR);
                 error.setTitle("Lỗi");
-                error.setContentText("Xóa sách thất bại!");
+                error.setContentText("Xóa tác giả thất bại!");
                 error.showAndWait();
             }
         }
@@ -149,6 +143,6 @@ public class BookListController {
     @FXML
     private void onLogout() {
         Session.clear();
-        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", bookTable.getScene());
+        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", authorTable.getScene());
     }
 }

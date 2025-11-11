@@ -1,117 +1,163 @@
--- Tạo database
-CREATE DATABASE IF NOT EXISTS StoryGraph_db2
-CHARACTER SET utf8mb4
-COLLATE utf8mb4_unicode_ci;
+-- =============================================
+-- 📚 LIBRARY MANAGEMENT DATABASE – FULL SCRIPT
+-- ✅ FIXED ERROR #1067 (Timestamp default issue)
+-- ✅ Compatible with MySQL + phpMyAdmin (XAMPP)
+-- =============================================
 
-USE StoryGraph_db2;
+-- 0️⃣ TẠO DATABASE MỚI
+DROP DATABASE IF EXISTS storygraph_db;
+CREATE DATABASE storygraph_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE storygraph_db;
 
--- 1. User
-CREATE TABLE User (
-    UserID INT AUTO_INCREMENT PRIMARY KEY,
-    Username VARCHAR(50) NOT NULL UNIQUE,
-    Email VARCHAR(100) NOT NULL UNIQUE,
-    PasswordHash VARCHAR(255) NOT NULL,
-    FullName VARCHAR(100),
-    JoinDate DATETIME DEFAULT CURRENT_TIMESTAMP,
-    AvatarURL VARCHAR(255)
+-- 1️⃣ USER
+CREATE TABLE `User` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `UserName` VARCHAR(100) NOT NULL UNIQUE,
+    `Email` VARCHAR(255) NOT NULL UNIQUE,
+    `PhoneNumber` BIGINT NULL,
+    `Password` VARCHAR(255) NOT NULL,
+    `Role` TINYINT NOT NULL DEFAULT 0 COMMENT '0=User, 1=Admin, 2=Librarian',
+    `CreateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_email (Email),
+    INDEX idx_username (UserName)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 2️⃣ BOOK
+CREATE TABLE `Book` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `Title` VARCHAR(255) NOT NULL,
+    `Description` TEXT NULL,
+    `Image` VARCHAR(500) NULL,
+    `Url` VARCHAR(500) NULL,
+    `CreateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `UpdateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_title (Title),
+    FULLTEXT INDEX idx_search (Title, Description)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 3️⃣ AUTHOR
+CREATE TABLE `Author` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `Name` VARCHAR(255) NOT NULL,
+    `Description` TEXT NULL,
+    `Image` VARCHAR(500) NULL,
+    INDEX idx_author_name (Name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4️⃣ CATEGORY
+CREATE TABLE `Category` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `Name` VARCHAR(100) NOT NULL UNIQUE,
+    `Description` TEXT NULL,
+    INDEX idx_category_name (Name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 5️⃣ BOOKAUTHOR
+CREATE TABLE `BookAuthor` (
+    `BookId` INT NOT NULL,
+    `AuthorId` INT NOT NULL,
+    PRIMARY KEY (`BookId`, `AuthorId`),
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`AuthorId`) REFERENCES `Author`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 2. Authors
-CREATE TABLE Authors (
-    AuthorID INT AUTO_INCREMENT PRIMARY KEY,
-    AuthorName VARCHAR(100) NOT NULL,
-    BirthYear INT,
-    Nationality VARCHAR(50),
-    Biography TEXT,
-    CONSTRAINT chk_birthyear_range CHECK (BirthYear IS NULL OR (BirthYear >= 0 AND BirthYear <= 9999))
+-- 6️⃣ BOOKCATEGORY
+CREATE TABLE `BookCategory` (
+    `BookId` INT NOT NULL,
+    `CategoryId` INT NOT NULL,
+    PRIMARY KEY (`BookId`, `CategoryId`),
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`CategoryId`) REFERENCES `Category`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 3. Books (AN TOÀN CHO XAMPP - KHÔNG DÙNG HÀM TRONG CHECK)
-CREATE TABLE Books (
-    BookID INT AUTO_INCREMENT PRIMARY KEY,
-    Title VARCHAR(150) NOT NULL,
-    AuthorID INT NOT NULL,
-    PublishedYear INT,
-    Description TEXT,
-    CoverImageURL VARCHAR(255),
-    Language VARCHAR(50) DEFAULT 'Tiếng Việt',
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-
-    CONSTRAINT chk_published_year
-        CHECK (PublishedYear IS NULL OR (PublishedYear >= 0 AND PublishedYear <= 9999)),
-
-    FOREIGN KEY (AuthorID)
-        REFERENCES Authors(AuthorID)
-        ON DELETE RESTRICT
-        ON UPDATE CASCADE
+-- 7️⃣ BORROW – ĐÃ SỬA LỖI #1067
+CREATE TABLE `Borrow` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `BorrowDay` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    `ExpireDay` TIMESTAMP NOT NULL DEFAULT '2038-01-19 03:14:07',  -- ✅ Hợp lệ với MySQL
+    `ReturnDateTime` TIMESTAMP NULL,
+    `UserId` INT NOT NULL,
+    `BookId` INT NOT NULL,
+    `Status` TINYINT NOT NULL DEFAULT 0 COMMENT '0=Đang mượn, 1=Đã trả, 2=Quá hạn',
+    FOREIGN KEY (`UserId`) REFERENCES `User`(`Id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE RESTRICT ON UPDATE CASCADE,
+    INDEX idx_user_status (UserId, Status),
+    INDEX idx_expire_status (ExpireDay, Status),
+    INDEX idx_borrowday (BorrowDay)
 ) ENGINE=InnoDB;
 
--- 4. Genres
-CREATE TABLE Genres (
-    GenreID INT AUTO_INCREMENT PRIMARY KEY,
-    GenreName VARCHAR(50) NOT NULL UNIQUE,
-    Description VARCHAR(255)
+-- 🔁 TRIGGER: TỰ ĐỘNG TÍNH EXPIREDATE (+14 ngày)
+DELIMITER $$
+CREATE TRIGGER trg_set_expire_day
+BEFORE INSERT ON Borrow
+FOR EACH ROW
+BEGIN
+    IF NEW.ExpireDay = '2038-01-19 03:14:07' THEN
+        SET NEW.ExpireDay = DATE_ADD(NEW.BorrowDay, INTERVAL 14 DAY);
+    END IF;
+END$$
+DELIMITER ;
+
+-- 8️⃣ REVIEW
+CREATE TABLE `Review` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `UserId` INT NOT NULL,
+    `BookId` INT NOT NULL,
+    `Rating` DECIMAL(3,2) CHECK (`Rating` >= 0 AND `Rating` <= 5),
+    `Comment` TEXT NULL,
+    `CreateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`UserId`) REFERENCES `User`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    UNIQUE KEY uniq_user_book (`UserId`, `BookId`),
+    INDEX idx_book_rating (BookId, Rating DESC)
 ) ENGINE=InnoDB;
 
--- 5. BookGenres
-CREATE TABLE BookGenres (
-    BookID INT NOT NULL,
-    GenreID INT NOT NULL,
-    PRIMARY KEY (BookID, GenreID),
-    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (GenreID) REFERENCES Genres(GenreID) ON DELETE CASCADE ON UPDATE CASCADE
+-- 9️⃣ SHELVES
+CREATE TABLE `Shelves` (
+    `Id` INT PRIMARY KEY AUTO_INCREMENT,
+    `Name` VARCHAR(255) NOT NULL,
+    `UserId` INT NOT NULL,
+    `Description` TEXT NULL,
+    `CreateTime` TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (`UserId`) REFERENCES `User`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    INDEX idx_user_shelves (UserId)
 ) ENGINE=InnoDB;
 
--- 6. Reviews
-CREATE TABLE Reviews (
-    ReviewID INT AUTO_INCREMENT PRIMARY KEY,
-    BookID INT NOT NULL,
-    UserID INT NOT NULL,
-    Rating DECIMAL(2,1) NOT NULL CHECK (Rating >= 1.0 AND Rating <= 5.0),
-    Comment TEXT,
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE KEY unique_user_book_review (UserID, BookID)
+-- 🔟 BOOKSHELVES
+CREATE TABLE `BookShelves` (
+    `ShelvesId` INT NOT NULL,
+    `BookId` INT NOT NULL,
+    PRIMARY KEY (`ShelvesId`, `BookId`),
+    FOREIGN KEY (`ShelvesId`) REFERENCES `Shelves`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 7. UserReadingLists
-CREATE TABLE UserReadingLists (
-    ListID INT AUTO_INCREMENT PRIMARY KEY,
-    UserID INT NOT NULL,
-    ListName VARCHAR(100) NOT NULL,
-    CreatedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (UserID) REFERENCES User(UserID) ON DELETE CASCADE ON UPDATE CASCADE,
-    UNIQUE KEY unique_user_listname (UserID, ListName)
+-- 11️⃣ TOPRATE
+CREATE TABLE `TopRate` (
+    `UserId` INT NOT NULL,
+    `BookId` INT NOT NULL,
+    PRIMARY KEY (`UserId`, `BookId`),
+    FOREIGN KEY (`UserId`) REFERENCES `User`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE,
+    FOREIGN KEY (`BookId`) REFERENCES `Book`(`Id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB;
 
--- 8. ReadingListBooks
-CREATE TABLE ReadingListBooks (
-    ListID INT NOT NULL,
-    BookID INT NOT NULL,
-    AddedAt DATETIME DEFAULT CURRENT_TIMESTAMP,
-    PRIMARY KEY (ListID, BookID),
-    FOREIGN KEY (ListID) REFERENCES UserReadingLists(ListID) ON DELETE CASCADE ON UPDATE CASCADE,
-    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+-- 🧩 DỮ LIỆU MẪU
+INSERT INTO `User` (`UserName`, `Email`, `PhoneNumber`, `Password`, `Role`) VALUES
+('admin', 'admin@library.com', 901234567, 'admin123', 1),
+('john_doe', 'john@example.com', 901234568, 'user123', 0);
 
--- 9. BookStats
-CREATE TABLE BookStats (
-    BookID INT PRIMARY KEY,
-    TotalReviews INT DEFAULT 0 CHECK (TotalReviews >= 0),
-    AverageRating DECIMAL(3,2) DEFAULT 0.00 CHECK (AverageRating >= 0 AND AverageRating <= 5.00),
-    LastUpdated DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    FOREIGN KEY (BookID) REFERENCES Books(BookID) ON DELETE CASCADE ON UPDATE CASCADE
-) ENGINE=InnoDB;
+INSERT INTO `Category` (`Name`) VALUES
+('Tiểu thuyết'),
+('Khoa học'),
+('Lịch sử');
 
--- Thêm tác giả
-INSERT INTO Authors (AuthorName, BirthYear) VALUES ('Nguyễn Nhật Ánh', 1955);
+INSERT INTO `Author` (`Name`) VALUES
+('Nguyễn Nhật Ánh'),
+('Yuval Noah Harari');
 
--- Thêm sách
-INSERT INTO Books (Title, AuthorID, PublishedYear) VALUES ('Cho tôi xin một vé đi tuổi thơ', 1, 2008);
+INSERT INTO `Book` (`Title`, `Description`) VALUES
+('Cho Tôi Xin Một Vé Đi Tuổi Thơ', 'Hồi ức tuổi thơ'),
+('Sapiens', 'Lược sử loài người');
 
--- Thêm thể loại
-INSERT INTO Genres (GenreName) VALUES ('Văn học thiếu nhi'), ('Tình cảm');
-
--- Liên kết sách với thể loại
-INSERT INTO BookGenres (BookID, GenreID) VALUES (1, 1), (1, 2);
+-- ✅ KẾT QUẢ XÁC NHẬN
+SELECT '✅ DATABASE storygraph_db ĐÃ TẠO THÀNH CÔNG – KHÔNG LỖI #1067!' AS Status;

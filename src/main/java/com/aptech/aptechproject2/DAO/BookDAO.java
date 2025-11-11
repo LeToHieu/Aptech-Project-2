@@ -3,43 +3,24 @@ package com.aptech.aptechproject2.DAO;
 import com.aptech.aptechproject2.Model.Book;
 import com.aptech.aptechproject2.Ulti.DBUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
 public class BookDAO {
 
-    // LẤY TẤT CẢ SÁCH (có JOIN với Authors và BookGenres)
-    public List<Book> getAll() {
+    public List<Book> getAllBooks() {
         List<Book> books = new ArrayList<>();
-        String sql = """
-            SELECT
-                b.BookID,
-                b.Title,
-                a.AuthorName,
-                b.PublishedYear,
-                GROUP_CONCAT(g.GenreName ORDER BY g.GenreName SEPARATOR ', ') AS Genres
-            FROM Books b
-            JOIN Authors a ON b.AuthorID = a.AuthorID
-            LEFT JOIN BookGenres bg ON b.BookID = bg.BookID
-            LEFT JOIN Genres g ON bg.GenreID = g.GenreID
-            GROUP BY b.BookID
-            ORDER BY b.Title
-            """;
-
+        String sql = "SELECT * FROM book ORDER BY CreateTime DESC";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql);
-             ResultSet rs = stmt.executeQuery()) {
-
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                Book book = new Book(
-                        rs.getInt("BookID"),
-                        rs.getString("Title"),
-                        rs.getString("AuthorName"),
-                        rs.getInt("PublishedYear"),
-                        rs.getString("Genres") != null ? rs.getString("Genres") : "Không có thể loại"
-                );
-                books.add(book);
+                books.add(extractBook(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
@@ -47,37 +28,99 @@ public class BookDAO {
         return books;
     }
 
-    // TÌM THEO ID (nếu cần sau này)
-    public Book getById(int bookId) {
-        String sql = """
-            SELECT
-                b.BookID, b.Title, a.AuthorName, b.PublishedYear,
-                GROUP_CONCAT(g.GenreName SEPARATOR ', ') AS Genres
-            FROM Books b
-            JOIN Authors a ON b.AuthorID = a.AuthorID
-            LEFT JOIN BookGenres bg ON b.BookID = bg.BookID
-            LEFT JOIN Genres g ON bg.GenreID = g.GenreID
-            WHERE b.BookID = ?
-            GROUP BY b.BookID
-            """;
-
+    public List<Book> getLatestBooks(int limit) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM book ORDER BY CreateTime DESC LIMIT ?";
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
-
-            stmt.setInt(1, bookId);
-            ResultSet rs = stmt.executeQuery();
-            if (rs.next()) {
-                return new Book(
-                        rs.getInt("BookID"),
-                        rs.getString("Title"),
-                        rs.getString("AuthorName"),
-                        rs.getInt("PublishedYear"),
-                        rs.getString("Genres") != null ? rs.getString("Genres") : "Không có thể loại"
-                );
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return null;
+        return books;
+    }
+
+    public List<Book> searchBooksByTitle(String keyword) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM book WHERE Title LIKE ? ORDER BY CreateTime DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public boolean create(Book book) {
+        String sql = "INSERT INTO book (Title, Description, Image, Url) VALUES (?, ?, ?, ?)";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getDescription());
+            stmt.setString(3, book.getImage());
+            stmt.setString(4, book.getUrl());
+
+            int affectedRows = stmt.executeUpdate();
+            if (affectedRows > 0) {
+                ResultSet rs = stmt.getGeneratedKeys();
+                if (rs.next()) {
+                    book.setId(rs.getInt(1));
+                }
+                return true;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean update(Book book) {
+        String sql = "UPDATE book SET Title = ?, Description = ?, Image = ?, Url = ? WHERE Id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setString(1, book.getTitle());
+            stmt.setString(2, book.getDescription());
+            stmt.setString(3, book.getImage());
+            stmt.setString(4, book.getUrl());
+            stmt.setInt(5, book.getId());
+
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean delete(int id) {
+        String sql = "DELETE FROM book WHERE Id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+            stmt.setInt(1, id);
+            return stmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    private Book extractBook(ResultSet rs) throws SQLException {
+        Book book = new Book();
+        book.setId(rs.getInt("Id"));
+        book.setTitle(rs.getString("Title"));
+        book.setDescription(rs.getString("Description"));
+        book.setImage(rs.getString("Image"));
+        book.setUrl(rs.getString("Url"));
+        book.setCreateTime(rs.getTimestamp("CreateTime"));
+        book.setUpdateTime(rs.getTimestamp("UpdateTime"));
+        return book;
     }
 }

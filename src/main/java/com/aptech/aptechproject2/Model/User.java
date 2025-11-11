@@ -6,16 +6,16 @@ public class User {
     private long id;
     private String username;
     private String email;
-    private String phonenumber;
+    private String phoneNumber;
     private String password;
     private int role;
     private LocalDateTime createTime;
 
-    public User(long id, String username, String email, String phonenumber, String password, int role, LocalDateTime createTime) {
+    public User(long id, String username, String email, String phoneNumber, String password, int role, LocalDateTime createTime) {
         this.id = id;
         this.username = username;
         this.email = email;
-        this.phonenumber = phonenumber;
+        this.phoneNumber = phoneNumber;
         this.password = password;
         this.role = role;
         this.createTime = createTime;
@@ -24,7 +24,7 @@ public class User {
     public User(String username, String email, String phonenumber, String password, int role) {
         this.username = username;
         this.email = email;
-        this.phonenumber = phonenumber;
+        this.phoneNumber = phonenumber;
         this.password = password;
         this.role = role;
     }
@@ -36,8 +36,8 @@ public class User {
     public void setUsername(String username) { this.username = username; }
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
-    public String getPhoneNumber() { return phonenumber; }
-    public void setPhoneNumber(String phoneNumber) { this.phonenumber = phonenumber; }
+    public String getPhoneNumber() { return phoneNumber; }
+    public void setPhoneNumber(String phoneNumber) { this.phoneNumber = phoneNumber; }
     public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
     public int getRole() { return role; }
@@ -47,9 +47,9 @@ public class User {
 
     public String getRoleName() {
         return switch (role) {
-            case 0 -> "Admin";
-            case 1 -> "Worker";
-            case 2 -> "User";
+            case 0 -> "User";
+            case 1 -> "Admin";
+            case 2 -> "Librarian";
             default -> "Unknown";
         };
     }
@@ -60,7 +60,7 @@ public class User {
                 "id=" + id +
                 ", username='" + username + '\'' +
                 ", email='" + email + '\'' +
-                ", phoneNumber=" + phonenumber +
+                ", phoneNumber=" + phoneNumber +
                 ", role=" + getRoleName() +
                 ", createTime=" + createTime +
                 '}';

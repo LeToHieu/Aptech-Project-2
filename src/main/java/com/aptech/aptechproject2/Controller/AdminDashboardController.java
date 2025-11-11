@@ -1,6 +1,7 @@
 package com.aptech.aptechproject2.Controller;
 
 import com.aptech.aptechproject2.Ulti.SceneManager;
+import com.aptech.aptechproject2.Ulti.Session;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -17,24 +18,23 @@ public class AdminDashboardController {
 
     @FXML
     private void initialize() {
-//        showBooks();
         showUsers();
         setActiveButton(usersBtn);
     }
 
-    @FXML private void showUsers()   { loadContent("/com/aptech/aptechproject2/fxml/user_list.fxml");   setActiveButton(usersBtn); }
-    @FXML private void showBooks()   { loadContent("/com/aptech/aptechproject2/fxml/book_list.fxml");   setActiveButton(booksBtn); }
+    @FXML private void showUsers() { loadContent("/com/aptech/aptechproject2/fxml/user_list.fxml"); setActiveButton(usersBtn); }
+    @FXML private void showBooks() { loadContent("/com/aptech/aptechproject2/fxml/book_list.fxml"); setActiveButton(booksBtn); }
     @FXML private void showAuthors() { loadContent("/com/aptech/aptechproject2/fxml/author_list.fxml"); setActiveButton(authorsBtn); }
 
     @FXML
     private void onLogout() {
-        SceneManager.setCurrentUser(null);
+        Session.clear();
         SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", contentArea.getScene());
     }
 
     private void loadContent(String fxmlPath) {
         try {
-            Parent content = FXMLLoader.load(AdminDashboardController.class.getResource(fxmlPath));
+            Parent content = FXMLLoader.load(getClass().getResource(fxmlPath));
             contentArea.getChildren().setAll(content);
         } catch (IOException e) {
             e.printStackTrace();

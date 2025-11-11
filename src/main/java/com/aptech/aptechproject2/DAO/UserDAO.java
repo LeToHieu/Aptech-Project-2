@@ -107,7 +107,7 @@ public class UserDAO {
     }
 
     public boolean update(User user) {
-        String sql = "UPDATE user SET username = ?, email = ?, phonenumber = ?, role = ? WHERE id = ?";
+        String sql = "UPDATE user SET UserName = ?, Email = ?, PhoneNumber = ?, Role = ? WHERE Id = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setString(1, user.getUsername());
@@ -115,11 +115,13 @@ public class UserDAO {
             stmt.setString(3, user.getPhoneNumber());
             stmt.setInt(4, user.getRole());
             stmt.setLong(5, user.getId());
-            return stmt.executeUpdate() > 0;
+
+            int rowsUpdated = stmt.executeUpdate();
+            return rowsUpdated > 0;  // Trả true nếu update ít nhất 1 hàng
         } catch (SQLException e) {
-            e.printStackTrace();
+            e.printStackTrace();  // Log lỗi để debug (có thể thay bằng logger)
+            return false;
         }
-        return false;
     }
 
     public boolean delete(long id) {
