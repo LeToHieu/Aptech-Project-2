@@ -112,7 +112,7 @@ public class BookDAO {
         return false;
     }
 
-    private Book extractBook(ResultSet rs) throws SQLException {
+    public Book extractBook(ResultSet rs) throws SQLException {
         Book book = new Book();
         book.setId(rs.getInt("Id"));
         book.setTitle(rs.getString("Title"));
@@ -122,5 +122,25 @@ public class BookDAO {
         book.setCreateTime(rs.getTimestamp("CreateTime"));
         book.setUpdateTime(rs.getTimestamp("UpdateTime"));
         return book;
+    }
+
+    public List<Book> getTopRatedBooks(int limit) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, AVG(r.Rating) AS avg_rating " +
+                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
+                "GROUP BY b.Id ORDER BY avg_rating DESC LIMIT ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Book book = extractBook(rs);
+                book.setAverageRating(rs.getDouble("avg_rating"));
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
     }
 }
