@@ -6,6 +6,7 @@ import com.aptech.aptechproject2.Model.User;
 import com.aptech.aptechproject2.Ulti.DBUtil;
 import com.aptech.aptechproject2.Ulti.SceneManager;
 import com.aptech.aptechproject2.Ulti.Session;
+import javafx.application.Platform;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
@@ -16,6 +17,7 @@ import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Text;
+import javafx.stage.Stage;
 import org.mindrot.jbcrypt.BCrypt;
 
 import java.io.FileInputStream;
@@ -30,19 +32,25 @@ public class UserDashboardController {
     private TextField searchField;
 
     @FXML
-    private GridPane booksGrid;
+    private GridPane booksGrid, topRatedGrid;
 
     private BookDAO bookDAO = new BookDAO();
 
-    private final int COLS = 4; // 4 cột
-    private final int ROWS = 3; // 3 hàng
+    private final int COLS = 5; // 5 cột main grid
+    private final int ROWS = 3; // 3 hàng main grid
 
     @FXML
     public void initialize() {
+        Platform.runLater(() -> {
+            Stage stage = (Stage) searchField.getScene().getWindow();
+            stage.setFullScreen(true);
+        });
+
         loadLatestBooks();
+        loadTopRatedBooks();
     }
 
-    // Load 12 sách mới nhất
+    // Load 15 sách mới nhất cho main grid
     private void loadLatestBooks() {
         booksGrid.getChildren().clear();
         List<Book> books = bookDAO.getLatestBooks(ROWS * COLS);
@@ -51,14 +59,14 @@ public class UserDashboardController {
             for (int col = 0; col < COLS; col++) {
                 if (index >= books.size()) break;
                 Book book = books.get(index++);
-                VBox bookBox = createBookBox(book);
+                VBox bookBox = createBookBox(book, 120, 160); // Size lớn cho main
                 booksGrid.add(bookBox, col, row);
             }
         }
     }
 
-    // Tạo VBox cho 1 cuốn sách
-    private VBox createBookBox(Book book) {
+    // Tạo VBox cho sách (param size cho image)
+    private VBox createBookBox(Book book, int imgWidth, int imgHeight) {
         VBox box = new VBox();
         box.setPadding(new Insets(5));
         box.setSpacing(5);
@@ -66,15 +74,15 @@ public class UserDashboardController {
         try {
             String path = "src/main/resources/com/aptech/aptechproject2/" + book.getImage();
             ImageView imageView = new ImageView(new Image(new FileInputStream(path)));
-            imageView.setFitWidth(120);
-            imageView.setFitHeight(160);
+            imageView.setFitWidth(imgWidth);
+            imageView.setFitHeight(imgHeight);
             box.getChildren().add(imageView);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         Text titleText = new Text(book.getTitle());
-        titleText.setWrappingWidth(120);
+        titleText.setWrappingWidth(imgWidth);
         box.getChildren().add(titleText);
 
         return box;
@@ -93,31 +101,74 @@ public class UserDashboardController {
                 for (int col = 0; col < COLS; col++) {
                     if (index >= books.size()) break;
                     Book book = books.get(index++);
-                    VBox bookBox = createBookBox(book);
+                    VBox bookBox = createBookBox(book, 120, 160);
                     booksGrid.add(bookBox, col, row);
                 }
             }
         }
     }
 
+    private void loadTopRatedBooks() {
+        topRatedGrid.getChildren().clear();
+        List<Book> topBooks = bookDAO.getTopRatedBooks(10);
+        int index = 0;
+        int topRows = 2; // 2 hàng
+        int topCols = 5; // 5 cột (5x2=10)
+        for (int row = 0; row < topRows; row++) {
+            for (int col = 0; col < topCols; col++) {
+                if (index >= topBooks.size()) break;
+                Book book = topBooks.get(index++);
+                VBox bookBox = createBookBox(book, 115, 115); // Size nhỏ
+                HBox ratingBox = createRatingBox(book.getAverageRating()); // Thêm rating sao
+                bookBox.getChildren().add(ratingBox);
+                topRatedGrid.add(bookBox, col, row);
+            }
+        }
+    }
+
+    // Tạo HBox cho rating sao (sử dụng Unicode, không cần image)
+    private HBox createRatingBox(double rating) {
+        HBox ratingBox = new HBox(2);
+        int fullStars = (int) rating;
+        boolean hasHalf = rating - fullStars >= 0.5;
+
+        for (int i = 0; i < fullStars; i++) {
+            Text star = new Text("★"); // Sao đầy (Unicode)
+            star.setStyle("-fx-fill: black; -fx-font-size: 15;");
+            ratingBox.getChildren().add(star);
+        }
+
+        if (hasHalf) {
+            Text halfStar = new Text("½★"); // Sao nửa (Unicode hoặc kết hợp)
+            halfStar.setStyle("-fx-fill: black; -fx-font-size: 15;");
+            ratingBox.getChildren().add(halfStar);
+        }
+
+        // Điền sao rỗng đến 5 sao nếu muốn (tùy chọn)
+        int emptyStars = 5 - fullStars - (hasHalf ? 1 : 0);
+        for (int i = 0; i < emptyStars; i++) {
+            Text emptyStar = new Text("☆"); // Sao rỗng (Unicode)
+            emptyStar.setStyle("-fx-fill: black; -fx-font-size: 15;");
+            ratingBox.getChildren().add(emptyStar);
+        }
+
+        return ratingBox;
+    }
+
+    @FXML
+    void onHome(ActionEvent event) {
+        loadLatestBooks(); // Refresh trang chủ (load latest)
+    }
+
+    @FXML
+    void onViewAllBooksFull(ActionEvent event) {
+        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/all_books.fxml", searchField.getScene());
+    }
+
     @FXML
     void onLogout(ActionEvent event) {
         Session.clear();
         SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", searchField.getScene());
-    }
-    @FXML
-    void onViewAllBooks(ActionEvent event) {
-        booksGrid.getChildren().clear();
-        List<Book> books = bookDAO.getAllBooks();
-        int index = 0;
-        for (int row = 0; row < ROWS; row++) {
-            for (int col = 0; col < COLS; col++) {
-                if (index >= books.size()) break;
-                Book book = books.get(index++);
-                VBox bookBox = createBookBox(book);
-                booksGrid.add(bookBox, col, row);
-            }
-        }
     }
 
     @FXML
@@ -180,13 +231,11 @@ public class UserDashboardController {
         booksGrid.getChildren().clear();
         User currentUser = Session.getCurrentUser();
         if (currentUser == null) {
-            // Xử lý nếu chưa login (phòng thủ)
             Alert alert = new Alert(Alert.AlertType.ERROR);
             alert.setTitle("Lỗi");
             alert.setHeaderText(null);
             alert.setContentText("Bạn chưa đăng nhập. Vui lòng đăng nhập lại!");
             alert.showAndWait();
-            // TODO: Chuyển về màn hình login (sử dụng SceneManager nếu có)
             return;
         }
 
@@ -214,7 +263,6 @@ public class UserDashboardController {
                 String phone = phoneField.getText().trim();
                 String password = passwordField.getText().trim();
 
-                // Cập nhật vào DB
                 String sql = "UPDATE user SET UserName=?, Email=?, PhoneNumber=?, Password=? WHERE Id=?";
                 try (Connection conn = DBUtil.getConnection();
                      PreparedStatement ps = conn.prepareStatement(sql)) {
@@ -224,22 +272,20 @@ public class UserDashboardController {
 
                     String hashed = null;
                     if (!password.isEmpty()) {
-                        // Nếu đổi mật khẩu, hash trước
                         hashed = BCrypt.hashpw(password, BCrypt.gensalt());
                         ps.setString(4, hashed);
                     } else {
-                        ps.setString(4, currentUser.getPassword()); // Giữ password cũ (đã hashed)
+                        ps.setString(4, currentUser.getPassword());
                     }
 
                     ps.setLong(5, currentUser.getId());
                     ps.executeUpdate();
 
-                    // Cập nhật session
                     currentUser.setUsername(username);
                     currentUser.setEmail(email);
                     currentUser.setPhoneNumber(phone);
                     if (hashed != null) {
-                        currentUser.setPassword(hashed); // Sửa lỗi: dùng hashed thay vì ps.toString()
+                        currentUser.setPassword(hashed);
                     }
 
                     Alert alert = new Alert(Alert.AlertType.INFORMATION);
@@ -266,7 +312,4 @@ public class UserDashboardController {
 
         booksGrid.add(form, 0, 0);
     }
-
-
-
 }

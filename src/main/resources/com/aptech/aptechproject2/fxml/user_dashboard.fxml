@@ -3,28 +3,41 @@
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.*?>
 
-<VBox xmlns="http://javafx.com/javafx"
-      xmlns:fx="http://javafx.com/fxml"
-      fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController"
-      spacing="10" style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
+<BorderPane xmlns="http://javafx.com/javafx"
+            xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController"
+            style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
 
-    <!-- Header -->
-    <HBox spacing="10">
-        <TextField fx:id="searchField" promptText="Tìm kiếm sách..." HBox.hgrow="ALWAYS"/>
-        <Button text="Tìm kiếm" onAction="#onSearch"/>
-    </HBox>
+    <!-- Center: Main content with big GridPane wrapping booksGrid and topRatedGrid -->
+    <center>
+        <VBox spacing="10">
+            <!-- Header -->
+            <HBox spacing="10">
+                <TextField fx:id="searchField" promptText="Tìm kiếm sách..." HBox.hgrow="ALWAYS"/>
+                <Button text="Tìm kiếm" onAction="#onSearch"/>
+            </HBox>
 
-    <!-- Action buttons -->
-    <HBox spacing="10">
-        <Button text="Thể loại sách" onAction="#onViewCategories"/>
-        <Button text="Các tác giả" onAction="#onViewAuthors"/>
-        <Button text="Tất cả sách" onAction="#onViewAllBooks"/>
-        <Button text="Thông tin người dùng" onAction="#onViewUserInfo"/>
-        <Button text="Đăng xuất" onAction="#onLogout"/>
-    </HBox>
+            <!-- Action buttons -->
+            <HBox spacing="10">
+                <Button text="Thể loại sách" onAction="#onViewCategories"/>
+                <Button text="Các tác giả" onAction="#onViewAuthors"/>
+                <Button text="Trang chủ" onAction="#onHome"/> <!-- Thay đổi từ "Tất cả sách" thành "Trang chủ" -->
+                <Button text="Tất cả sách" onAction="#onViewAllBooksFull"/> <!-- Button mới cho all books -->
+                <Button text="Thông tin người dùng" onAction="#onViewUserInfo"/>
+                <Button text="Đăng xuất" onAction="#onLogout"/>
+            </HBox>
 
-    <!-- Books grid -->
-    <ScrollPane fitToWidth="true">
-        <GridPane fx:id="booksGrid" hgap="20" vgap="20"/>
-    </ScrollPane>
-</VBox>
+            <!-- Big GridPane for books and toprated (side by side) -->
+            <ScrollPane fitToWidth="true">
+                <GridPane hgap="20" vgap="20">
+                    <GridPane fx:id="booksGrid" hgap="20" vgap="20" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+                    <VBox fx:id="topRatedPane" spacing="10" GridPane.rowIndex="0" GridPane.columnIndex="1" alignment="CENTER">
+                        <Label text="Top 10 sách đánh giá cao" style="-fx-font-size: 16; -fx-font-weight: bold; -fx-alignment: center;"/>
+                        <GridPane fx:id="topRatedGrid" hgap="25" vgap="25"/>
+                    </VBox>
+                </GridPane>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+</BorderPane>
