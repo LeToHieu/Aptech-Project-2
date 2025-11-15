@@ -112,7 +112,7 @@ public class BookDAO {
         return false;
     }
 
-    private Book extractBook(ResultSet rs) throws SQLException {
+    Book extractBook(ResultSet rs) throws SQLException {
         Book book = new Book();
         book.setId(rs.getInt("Id"));
         book.setTitle(rs.getString("Title"));

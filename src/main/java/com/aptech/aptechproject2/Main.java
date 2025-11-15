@@ -13,6 +13,10 @@ public class Main extends Application {
         stage.setTitle("BookApp - Login");
         stage.setScene(scene);
 
+        // ✅ Không cho resize dưới kích thước này
+        stage.setMinWidth(900);
+        stage.setMinHeight(550);
+
         stage.setMaximized(true); // FULL MÀN
         stage.show();
     }

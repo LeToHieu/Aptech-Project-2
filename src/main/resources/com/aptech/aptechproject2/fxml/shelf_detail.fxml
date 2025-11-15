@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.ShelfDetailController"
+      spacing="15" prefWidth="600" style="-fx-padding: 20; -fx-background-color: #f9f9f9;">
+
+    <Label fx:id="shelfNameLabel" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+    <Label fx:id="bookCountLabel" style="-fx-text-fill: #666;"/>
+
+    <Separator />
+
+    <TableView fx:id="bookTable" prefHeight="350">
+        <columns>
+            <TableColumn fx:id="titleCol" text="Tên sách" prefWidth="250"/>
+            <TableColumn fx:id="authorCol" text="Tác giả" prefWidth="150"/>
+            <TableColumn fx:id="isbnCol" text="ISBN" prefWidth="120"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button fx:id="removeBtn" text="Xóa khỏi kệ" onAction="#onRemove"
+                style="-fx-background-color: #dc3545; -fx-text-fill: white;" disable="true"/>
+        <Button text="Đóng" onAction="#onClose"
+                style="-fx-background-color: #6c757d; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>

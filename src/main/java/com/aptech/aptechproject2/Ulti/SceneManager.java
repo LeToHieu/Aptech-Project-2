@@ -16,10 +16,16 @@ public class SceneManager {
         try {
             Parent root = FXMLLoader.load(SceneManager.class.getResource(fxmlPath));
             Stage stage = (Stage) currentScene.getWindow();
-            Scene newScene = new Scene(root);
+
+            // ✅ Giữ nguyên kích thước cũ
+            double width = currentScene.getWidth();
+            double height = currentScene.getHeight();
             boolean isMax = stage.isMaximized();
+
+            Scene newScene = new Scene(root, width, height);
+
             stage.setScene(newScene);
-            stage.setMaximized(isMax);
+            stage.setMaximized(isMax); // vẫn giữ trạng thái full màn hình nếu đang bật
             stage.centerOnScreen();
         } catch (IOException e) {
             e.printStackTrace();
@@ -27,6 +33,5 @@ public class SceneManager {
         }
     }
 
-    public static User getCurrentUser() { return currentUser; }
-    public static void setCurrentUser(User user) { currentUser = user; }
+
 }

@@ -20,4 +20,13 @@ public class Session {
     public static void clear() {
         currentUser = null;
     }
+
+    public static boolean isAdmin() {
+        if (currentUser.getRole() != 0){
+            return true;
+        }else{
+            return false;
+        }
+    }
+
 }

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.EditCategoryController"
+      spacing="10" prefWidth="300" prefHeight="300" style="-fx-padding: 20; -fx-background-color: white;">
+
+    <Label text="Sửa Thông Tin Thể Loại" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <Label text="Tên:"/>
+    <TextField fx:id="nameField" promptText="Name"/>
+
+    <Label text="Mô tả:"/>
+    <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdateCategory"/>
+        <Button text="Hủy" onAction="#onCancel"/>
+    </HBox>
+</VBox>
