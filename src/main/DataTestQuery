@@ -3,12 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 14, 2025 lúc 05:52 PM
+-- Thời gian đã tạo: Th10 17, 2025 lúc 11:17 PM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
-
-Day la file da co day du du lieu de test roi nen ae dung thi nem len chat
-bao no lam cau lenh insert va create het vao cho la se khong bi loi db
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -255,17 +252,70 @@ INSERT INTO `bookshelves` (`ShelvesId`, `BookId`) VALUES
 -- --------------------------------------------------------
 
 --
+-- Cấu trúc bảng cho bảng `book_inventory`
+--
+
+CREATE TABLE `book_inventory` (
+  `BookId` int(11) NOT NULL,
+  `total_copies` int(11) NOT NULL DEFAULT 1,
+  `available_copies` int(11) NOT NULL DEFAULT 1,
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `book_inventory`
+--
+
+INSERT INTO `book_inventory` (`BookId`, `total_copies`, `available_copies`, `updated_at`) VALUES
+(1, 1, 1, '2025-11-17 21:33:23'),
+(2, 1, 1, '2025-11-17 21:33:23'),
+(3, 1, 1, '2025-11-17 21:33:23'),
+(4, 1, 1, '2025-11-17 21:33:23'),
+(5, 1, 1, '2025-11-17 21:33:23'),
+(6, 1, 1, '2025-11-17 21:33:23'),
+(7, 1, 1, '2025-11-17 21:33:23'),
+(8, 1, 1, '2025-11-17 21:33:23'),
+(9, 1, 1, '2025-11-17 21:33:23'),
+(10, 1, 1, '2025-11-17 21:33:23'),
+(11, 1, 1, '2025-11-17 21:33:23'),
+(12, 1, 1, '2025-11-17 21:33:23'),
+(13, 1, 1, '2025-11-17 21:33:23'),
+(14, 1, 0, '2025-11-17 22:05:42'),
+(15, 1, 1, '2025-11-17 21:33:23'),
+(16, 1, 1, '2025-11-17 21:33:23'),
+(17, 1, 1, '2025-11-17 21:33:23'),
+(18, 1, 0, '2025-11-17 21:33:23'),
+(19, 1, 1, '2025-11-17 21:33:23'),
+(20, 1, 1, '2025-11-17 21:33:23'),
+(21, 1, 1, '2025-11-17 21:33:23'),
+(22, 1, 1, '2025-11-17 21:33:23'),
+(23, 1, 1, '2025-11-17 21:33:23'),
+(24, 1, 1, '2025-11-17 21:33:23'),
+(25, 1, 1, '2025-11-17 21:33:23'),
+(26, 1, 1, '2025-11-17 21:33:23'),
+(27, 1, 1, '2025-11-17 21:33:23'),
+(28, 1, 1, '2025-11-17 21:33:23'),
+(29, 1, 0, '2025-11-17 21:33:23'),
+(30, 1, 0, '2025-11-17 21:33:23'),
+(31, 1, 1, '2025-11-17 21:33:23'),
+(32, 1, 0, '2025-11-17 21:33:23'),
+(33, 1, 1, '2025-11-17 21:33:23');
+
+-- --------------------------------------------------------
+
+--
 -- Cấu trúc bảng cho bảng `borrow`
 --
 
 CREATE TABLE `borrow` (
   `Id` int(11) NOT NULL,
   `BorrowDay` timestamp NOT NULL DEFAULT current_timestamp(),
-  `ExpireDay` timestamp NOT NULL DEFAULT '2038-01-18 20:14:07',
+  `ExpireDay` timestamp NULL DEFAULT NULL,
   `ReturnDateTime` timestamp NULL DEFAULT NULL,
   `UserId` int(11) NOT NULL,
   `BookId` int(11) NOT NULL,
-  `Status` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0=Đang mượn, 1=Đã trả, 2=Quá hạn'
+  `Status` tinyint(4) NOT NULL DEFAULT 0 COMMENT '0=Đang mượn, 1=Đã trả, 2=Quá hạn',
+  `ActiveBorrow` tinyint(1) GENERATED ALWAYS AS (case when `Status` = 0 then 1 else 0 end) STORED
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
@@ -273,7 +323,7 @@ CREATE TABLE `borrow` (
 --
 
 INSERT INTO `borrow` (`Id`, `BorrowDay`, `ExpireDay`, `ReturnDateTime`, `UserId`, `BookId`, `Status`) VALUES
-(1, '2025-11-01 02:00:00', '2025-11-15 02:00:00', NULL, 2, 20, 0),
+(1, '2025-11-01 02:00:00', '2025-11-15 02:00:00', NULL, 2, 20, 2),
 (2, '2025-10-25 07:30:00', '2025-11-08 07:30:00', '2025-11-05 04:00:00', 3, 11, 1),
 (3, '2025-11-05 09:00:00', '2025-11-19 09:00:00', NULL, 4, 18, 0),
 (4, '2025-10-20 03:00:00', '2025-11-03 03:00:00', NULL, 2, 6, 2),
@@ -282,19 +332,31 @@ INSERT INTO `borrow` (`Id`, `BorrowDay`, `ExpireDay`, `ReturnDateTime`, `UserId`
 (7, '2025-11-09 11:20:00', '2025-11-23 11:20:00', NULL, 2, 32, 0),
 (8, '2025-09-28 01:00:00', '2025-10-12 01:00:00', NULL, 3, 27, 2),
 (9, '2025-11-02 05:15:00', '2025-11-16 05:15:00', NULL, 1, 29, 0),
-(10, '2025-10-30 02:45:00', '2025-11-13 02:45:00', '2025-11-10 03:00:00', 2, 22, 1);
+(10, '2025-10-30 02:45:00', '2025-11-13 02:45:00', '2025-11-10 03:00:00', 2, 22, 1),
+(11, '2025-11-17 22:05:42', '2025-12-01 22:05:42', NULL, 4, 14, 0);
+
+-- --------------------------------------------------------
 
 --
--- Bẫy `borrow`
+-- Cấu trúc bảng cho bảng `borrow_audit`
 --
-DELIMITER $$
-CREATE TRIGGER `trg_set_expire_day` BEFORE INSERT ON `borrow` FOR EACH ROW BEGIN
-    IF NEW.ExpireDay = '2038-01-19 03:14:07' THEN
-        SET NEW.ExpireDay = DATE_ADD(NEW.BorrowDay, INTERVAL 14 DAY);
-    END IF;
-END
-$$
-DELIMITER ;
+
+CREATE TABLE `borrow_audit` (
+  `Id` int(11) NOT NULL,
+  `BorrowId` int(11) DEFAULT NULL,
+  `UserId` int(11) DEFAULT NULL,
+  `BookId` int(11) DEFAULT NULL,
+  `Action` varchar(30) DEFAULT NULL,
+  `Note` text DEFAULT NULL,
+  `CreatedAt` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Đang đổ dữ liệu cho bảng `borrow_audit`
+--
+
+INSERT INTO `borrow_audit` (`Id`, `BorrowId`, `UserId`, `BookId`, `Action`, `Note`, `CreatedAt`) VALUES
+(1, 11, 4, 14, 'borrow', NULL, '2025-11-17 22:05:42');
 
 -- --------------------------------------------------------
 
@@ -474,7 +536,7 @@ INSERT INTO `user` (`Id`, `UserName`, `Email`, `PhoneNumber`, `Password`, `Role`
 (1, 'admin', 'admin@library.com', 901234567, 'admin123', 1, '2025-11-09 20:32:58'),
 (2, 'john_doe', 'john@example.com', 901234568, 'user123', 0, '2025-11-09 20:32:58'),
 (3, 'admin1', 'admin1@gmail.com', 123456789, '$2a$10$C/oOJ5hHTs5A2t1hPN.jEOrC/ZmsIttpMaBRme2I3wK8HF0fyvJ5W', 1, '2025-11-09 20:42:54'),
-(4, 'Vu Duc Huy', 'huy@gmail.com', 965904537, '$2a$10$xOZKAcKmXFPSlZ0rGdgtgutSe94QCplannnNAzss57vOooWkSPoYq', 2, '2025-11-09 21:20:12');
+(4, 'Vu Duc Huy', 'huy@gmail.com', 965904537, '$2a$10$xOZKAcKmXFPSlZ0rGdgtgutSe94QCplannnNAzss57vOooWkSPoYq', 0, '2025-11-09 21:20:12');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -517,14 +579,32 @@ ALTER TABLE `bookshelves`
   ADD KEY `BookId` (`BookId`);
 
 --
+-- Chỉ mục cho bảng `book_inventory`
+--
+ALTER TABLE `book_inventory`
+  ADD PRIMARY KEY (`BookId`);
+
+--
 -- Chỉ mục cho bảng `borrow`
 --
 ALTER TABLE `borrow`
   ADD PRIMARY KEY (`Id`),
-  ADD KEY `BookId` (`BookId`),
+  ADD UNIQUE KEY `uniq_user_book_active` (`UserId`,`BookId`,`ActiveBorrow`),
   ADD KEY `idx_user_status` (`UserId`,`Status`),
   ADD KEY `idx_expire_status` (`ExpireDay`,`Status`),
-  ADD KEY `idx_borrowday` (`BorrowDay`);
+  ADD KEY `idx_borrowday` (`BorrowDay`),
+  ADD KEY `idx_borrow_book_status` (`BookId`,`Status`),
+  ADD KEY `idx_borrow_user_book_status` (`UserId`,`BookId`,`Status`);
+
+--
+-- Chỉ mục cho bảng `borrow_audit`
+--
+ALTER TABLE `borrow_audit`
+  ADD PRIMARY KEY (`Id`),
+  ADD KEY `idx_audit_borrow` (`BorrowId`),
+  ADD KEY `idx_audit_user` (`UserId`),
+  ADD KEY `idx_audit_book` (`BookId`),
+  ADD KEY `idx_audit_createdat` (`CreatedAt`);
 
 --
 -- Chỉ mục cho bảng `category`
@@ -586,7 +666,13 @@ ALTER TABLE `book`
 -- AUTO_INCREMENT cho bảng `borrow`
 --
 ALTER TABLE `borrow`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT cho bảng `borrow_audit`
+--
+ALTER TABLE `borrow_audit`
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT cho bảng `category`
@@ -598,7 +684,7 @@ ALTER TABLE `category`
 -- AUTO_INCREMENT cho bảng `review`
 --
 ALTER TABLE `review`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=67;
 
 --
 -- AUTO_INCREMENT cho bảng `shelves`
@@ -638,11 +724,23 @@ ALTER TABLE `bookshelves`
   ADD CONSTRAINT `bookshelves_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE ON UPDATE CASCADE;
 
 --
+-- Các ràng buộc cho bảng `book_inventory`
+--
+ALTER TABLE `book_inventory`
+  ADD CONSTRAINT `fk_inventory_book` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON DELETE CASCADE;
+
+--
 -- Các ràng buộc cho bảng `borrow`
 --
 ALTER TABLE `borrow`
   ADD CONSTRAINT `borrow_ibfk_1` FOREIGN KEY (`UserId`) REFERENCES `user` (`Id`) ON UPDATE CASCADE,
   ADD CONSTRAINT `borrow_ibfk_2` FOREIGN KEY (`BookId`) REFERENCES `book` (`Id`) ON UPDATE CASCADE;
+
+--
+-- Các ràng buộc cho bảng `borrow_audit`
+--
+ALTER TABLE `borrow_audit`
+  ADD CONSTRAINT `fk_audit_borrow` FOREIGN KEY (`BorrowId`) REFERENCES `borrow` (`Id`) ON DELETE SET NULL;
 
 --
 -- Các ràng buộc cho bảng `review`

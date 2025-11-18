@@ -34,6 +34,10 @@ public class UserDashboardController {
     @FXML
     private GridPane booksGrid, topRatedGrid;
 
+    // Thêm reference đến topRatedPane để có thể ẩn/hiện hoàn toàn phần Top Rated
+    @FXML
+    private VBox topRatedPane;
+
     private BookDAO bookDAO = new BookDAO();
 
     private final int COLS = 5; // 5 cột main grid
@@ -46,8 +50,18 @@ public class UserDashboardController {
             stage.setFullScreen(true);
         });
 
+        // Mặc định khi vào trang user_dashboard (Trang chủ) sẽ hiển thị TopRated
+        setTopRatedVisible(true);
         loadLatestBooks();
         loadTopRatedBooks();
+    }
+
+    // Helper để ẩn/hiện top rated pane và điều khiển quản lý layout
+    private void setTopRatedVisible(boolean visible) {
+        if (topRatedPane != null) {
+            topRatedPane.setVisible(visible);
+            topRatedPane.setManaged(visible); // Nếu false sẽ không chiếm không gian layout
+        }
     }
 
     // Load 15 sách mới nhất cho main grid
@@ -77,6 +91,49 @@ public class UserDashboardController {
             imageView.setFitWidth(imgWidth);
             imageView.setFitHeight(imgHeight);
             box.getChildren().add(imageView);
+
+            // make clickable to open book detail modal
+            box.setOnMouseClicked(evt -> {
+                try {
+                    javafx.fxml.FXMLLoader loader = new javafx.fxml.FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/book_detail.fxml"));
+                    javafx.scene.Scene scene = new javafx.scene.Scene(loader.load());
+                    BookDetailController controller = loader.getController();
+                    controller.setBook(book);
+                    javafx.stage.Stage stage = new javafx.stage.Stage();
+                    stage.setTitle("Chi tiết sách");
+                    stage.setScene(scene);
+                    stage.initModality(javafx.stage.Modality.APPLICATION_MODAL);
+                    stage.showAndWait();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+            // hover effect
+            javafx.scene.effect.DropShadow ds = new javafx.scene.effect.DropShadow();
+            ds.setRadius(8);
+            ds.setColor(javafx.scene.paint.Color.gray(0.3));
+
+            javafx.animation.ScaleTransition stEnter = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), box);
+            stEnter.setToX(1.05);
+            stEnter.setToY(1.05);
+            javafx.animation.ScaleTransition stExit = new javafx.animation.ScaleTransition(javafx.util.Duration.millis(150), box);
+            stExit.setToX(1.0);
+            stExit.setToY(1.0);
+
+            box.setOnMouseEntered(evt -> {
+                stExit.stop();
+                stEnter.playFromStart();
+                box.setEffect(ds);
+                box.setCursor(javafx.scene.Cursor.HAND);
+                box.toFront();
+            });
+            box.setOnMouseExited(evt -> {
+                stEnter.stop();
+                stExit.playFromStart();
+                box.setEffect(null);
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -92,8 +149,12 @@ public class UserDashboardController {
     void onSearch(ActionEvent event) {
         String keyword = searchField.getText().trim();
         if (keyword.isEmpty()) {
+            // Nếu bỏ trống thì trở về trang chủ => hiển thị TopRated
+            setTopRatedVisible(true);
             loadLatestBooks();
         } else {
+            // Tìm kiếm: ẩn TopRated vì không phải trang chủ
+            setTopRatedVisible(false);
             booksGrid.getChildren().clear();
             List<Book> books = bookDAO.searchBooksByTitle(keyword);
             int index = 0;
@@ -109,6 +170,7 @@ public class UserDashboardController {
     }
 
     private void loadTopRatedBooks() {
+        if (topRatedGrid == null) return;
         topRatedGrid.getChildren().clear();
         List<Book> topBooks = bookDAO.getTopRatedBooks(10);
         int index = 0;
@@ -157,11 +219,16 @@ public class UserDashboardController {
 
     @FXML
     void onHome(ActionEvent event) {
+        // Trang chủ: hiển thị lại TopRated và load latest
+        setTopRatedVisible(true);
         loadLatestBooks(); // Refresh trang chủ (load latest)
+        loadTopRatedBooks();
     }
 
     @FXML
     void onViewAllBooksFull(ActionEvent event) {
+        // Khi chuyển sang view khác (all_books), ẩn TopRated ở dashboard
+        setTopRatedVisible(false);
         SceneManager.loadScene("/com/aptech/aptechproject2/fxml/all_books.fxml", searchField.getScene());
     }
 
@@ -173,6 +240,8 @@ public class UserDashboardController {
 
     @FXML
     void onViewCategories(ActionEvent event) {
+        // Khi xem categories, ẩn TopRated
+        setTopRatedVisible(false);
         booksGrid.getChildren().clear();
         try (Connection conn = DBUtil.getConnection()) {
             PreparedStatement ps = conn.prepareStatement("SELECT name, description FROM category");
@@ -195,6 +264,8 @@ public class UserDashboardController {
 
     @FXML
     void onViewAuthors(ActionEvent event) {
+        // Khi xem authors, ẩn TopRated
+        setTopRatedVisible(false);
         booksGrid.getChildren().clear();
         try (Connection conn = DBUtil.getConnection()) {
             PreparedStatement ps = conn.prepareStatement("SELECT Name, Description, Image FROM author");
@@ -228,6 +299,8 @@ public class UserDashboardController {
 
     @FXML
     void onViewUserInfo(ActionEvent event) {
+        // Khi xem thông tin người dùng, ẩn TopRated
+        setTopRatedVisible(false);
         booksGrid.getChildren().clear();
         User currentUser = Session.getCurrentUser();
         if (currentUser == null) {
@@ -300,7 +373,11 @@ public class UserDashboardController {
         });
 
         Button backBtn = new Button("Quay lại trang chủ");
-        backBtn.setOnAction(e -> loadLatestBooks());
+        backBtn.setOnAction(e -> {
+            // Quay lại trang chủ: hiển thị TopRated
+            setTopRatedVisible(true);
+            loadLatestBooks();
+        });
 
         form.getChildren().addAll(
                 new Label("Tên người dùng:"), usernameField,
@@ -313,3 +390,4 @@ public class UserDashboardController {
         booksGrid.add(form, 0, 0);
     }
 }
+

@@ -10,6 +10,7 @@ module com.aptech.aptechproject2 {
     requires org.kordamp.bootstrapfx.core;
     requires java.sql;
     requires jbcrypt;
+    requires java.desktop;
 
     opens com.aptech.aptechproject2 to javafx.fxml, javafx.base;
     opens com.aptech.aptechproject2.Controller to javafx.fxml, javafx.base;
