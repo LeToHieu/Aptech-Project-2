@@ -24,6 +24,24 @@ public class CategoryDAO {
         return categories;
     }
 
+    public List<Category> getCategoriesByBookId(int bookId) {
+        List<Category> categories = new ArrayList<>();
+        String sql = "SELECT c.Id, c.Name, c.Description FROM category c " +
+                "JOIN bookcategory bc ON c.Id = bc.CategoryId WHERE bc.BookId = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    categories.add(extractCategory(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return categories;
+    }
+
     public boolean create(Category category) {
         String sql = "INSERT INTO Category (Name, Description) VALUES (?, ?)";
         try (Connection conn = DBUtil.getConnection();

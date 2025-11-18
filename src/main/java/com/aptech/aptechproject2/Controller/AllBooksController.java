@@ -6,11 +6,21 @@ import com.aptech.aptechproject2.Ulti.SceneManager;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.geometry.Insets;
+import javafx.scene.Cursor;
+import javafx.scene.Scene;
+import javafx.scene.control.*;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.fxml.FXMLLoader;
+import javafx.stage.Modality;
+import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.util.List;
@@ -56,6 +66,49 @@ public class AllBooksController {
             imageView.setFitWidth(120);
             imageView.setFitHeight(160);
             box.getChildren().add(imageView);
+
+            // make the box clickable to show book detail
+            box.setOnMouseClicked(evt -> {
+                try {
+                    FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/book_detail.fxml"));
+                    Scene scene = new Scene(loader.load());
+                    BookDetailController controller = loader.getController();
+                    controller.setBook(book);
+                    Stage stage = new Stage();
+                    stage.setTitle("Chi tiết sách");
+                    stage.setScene(scene);
+                    stage.initModality(Modality.APPLICATION_MODAL);
+                    stage.showAndWait();
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            });
+
+            // hover effect: scale + drop shadow
+            DropShadow ds = new DropShadow();
+            ds.setRadius(8);
+            ds.setColor(Color.gray(0.3));
+
+            ScaleTransition stEnter = new ScaleTransition(Duration.millis(150), box);
+            stEnter.setToX(1.05);
+            stEnter.setToY(1.05);
+            ScaleTransition stExit = new ScaleTransition(Duration.millis(150), box);
+            stExit.setToX(1.0);
+            stExit.setToY(1.0);
+
+            box.setOnMouseEntered(evt -> {
+                stExit.stop();
+                stEnter.playFromStart();
+                box.setEffect(ds);
+                box.setCursor(Cursor.HAND);
+                box.toFront();
+            });
+            box.setOnMouseExited(evt -> {
+                stEnter.stop();
+                stExit.playFromStart();
+                box.setEffect(null);
+            });
+
         } catch (Exception e) {
             e.printStackTrace();
         }

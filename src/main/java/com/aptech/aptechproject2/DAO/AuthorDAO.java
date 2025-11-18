@@ -33,6 +33,24 @@ public class AuthorDAO {
         return authors;
     }
 
+    public List<Author> getAuthorsByBookId(int bookId) {
+        List<Author> authors = new ArrayList<>();
+        String sql = "SELECT a.Id, a.Name, a.Description, a.Image FROM author a " +
+                "JOIN bookauthor ba ON a.Id = ba.AuthorId WHERE ba.BookId = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    authors.add(new Author(rs.getInt("Id"), rs.getString("Name"), rs.getString("Description"), rs.getString("Image")));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return authors;
+    }
+
     public boolean create(Author author) {
         String sql = "INSERT INTO author (Name, Description, Image) VALUES (?, ?, ?)";
         try (Connection conn = DBUtil.getConnection();

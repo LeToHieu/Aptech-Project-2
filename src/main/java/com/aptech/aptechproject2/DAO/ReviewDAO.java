@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDAO {
+<<<<<<< Updated upstream
+}
+=======
 
     public List<Review> getAllReviews() {
         List<Review> reviews = new ArrayList<>();
@@ -26,6 +29,33 @@ public class ReviewDAO {
             }
         } catch (SQLException e) { e.printStackTrace(); }
         return reviews;
+    }
+
+    public List<Review> getReviewsByBookId(int bookId) {
+        List<Review> reviews = new ArrayList<>();
+        String sql = "SELECT r.*, u.UserName FROM review r JOIN `User` u ON r.UserId = u.Id WHERE r.BookId = ? ORDER BY r.CreateTime DESC";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) reviews.add(extractReview(rs));
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return reviews;
+    }
+
+    public double getAverageRatingForBook(int bookId) {
+        String sql = "SELECT AVG(Rating) as avg_rating FROM review WHERE BookId = ?";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setInt(1, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getDouble("avg_rating");
+                }
+            }
+        } catch (SQLException e) { e.printStackTrace(); }
+        return 0.0;
     }
 
     public boolean create(Review review) {
@@ -74,9 +104,11 @@ public class ReviewDAO {
         r.setBookId(rs.getLong("BookId"));
         r.setRating(rs.getInt("Rating"));
         r.setComment(rs.getString("Comment"));
-        r.setCreatedAt(rs.getTimestamp("CreateAt"));
-        r.setUserName(rs.getString("UserName"));
-        r.setBookTitle(rs.getString("Title"));
+        // try both column names used in different sqls
+        try { r.setCreatedAt(rs.getTimestamp("CreateTime")); } catch (Exception ex) { try { r.setCreatedAt(rs.getTimestamp("CreateAt")); } catch (Exception ignored) {} }
+        try { r.setUserName(rs.getString("UserName")); } catch (Exception ignored) {}
+        try { r.setBookTitle(rs.getString("Title")); } catch (Exception ignored) {}
         return r;
     }
 }
+>>>>>>> Stashed changes
