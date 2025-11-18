@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ReviewDAO {
-<<<<<<< Updated upstream
-}
-=======
-
     public List<Review> getAllReviews() {
         List<Review> reviews = new ArrayList<>();
         String sql = """
@@ -111,4 +107,4 @@ public class ReviewDAO {
         return r;
     }
 }
->>>>>>> Stashed changes
+
