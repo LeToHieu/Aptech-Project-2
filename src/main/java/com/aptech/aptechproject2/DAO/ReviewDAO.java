@@ -7,7 +7,10 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
 public class ReviewDAO {
+
+
     public List<Review> getAllReviews() {
         List<Review> reviews = new ArrayList<>();
         String sql = """
@@ -15,7 +18,7 @@ public class ReviewDAO {
             FROM Review r
             JOIN `User` u ON r.UserId = u.Id
             JOIN Book b ON r.BookId = b.Id
-            ORDER BY r.CreateAt DESC
+            ORDER BY r.CreateTime DESC
             """;
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);

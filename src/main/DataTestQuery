@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Máy chủ: 127.0.0.1
--- Thời gian đã tạo: Th10 17, 2025 lúc 11:17 PM
+-- Thời gian đã tạo: Th10 22, 2025 lúc 01:49 AM
 -- Phiên bản máy phục vụ: 10.4.32-MariaDB
 -- Phiên bản PHP: 8.0.30
 
@@ -269,14 +269,14 @@ CREATE TABLE `book_inventory` (
 INSERT INTO `book_inventory` (`BookId`, `total_copies`, `available_copies`, `updated_at`) VALUES
 (1, 1, 1, '2025-11-17 21:33:23'),
 (2, 1, 1, '2025-11-17 21:33:23'),
-(3, 1, 1, '2025-11-17 21:33:23'),
+(3, 1, 0, '2025-11-18 13:24:50'),
 (4, 1, 1, '2025-11-17 21:33:23'),
 (5, 1, 1, '2025-11-17 21:33:23'),
 (6, 1, 1, '2025-11-17 21:33:23'),
 (7, 1, 1, '2025-11-17 21:33:23'),
 (8, 1, 1, '2025-11-17 21:33:23'),
-(9, 1, 1, '2025-11-17 21:33:23'),
-(10, 1, 1, '2025-11-17 21:33:23'),
+(9, 1, 0, '2025-11-17 22:42:39'),
+(10, 1, 0, '2025-11-17 22:42:46'),
 (11, 1, 1, '2025-11-17 21:33:23'),
 (12, 1, 1, '2025-11-17 21:33:23'),
 (13, 1, 1, '2025-11-17 21:33:23'),
@@ -291,7 +291,7 @@ INSERT INTO `book_inventory` (`BookId`, `total_copies`, `available_copies`, `upd
 (22, 1, 1, '2025-11-17 21:33:23'),
 (23, 1, 1, '2025-11-17 21:33:23'),
 (24, 1, 1, '2025-11-17 21:33:23'),
-(25, 1, 1, '2025-11-17 21:33:23'),
+(25, 1, 0, '2025-11-18 12:49:17'),
 (26, 1, 1, '2025-11-17 21:33:23'),
 (27, 1, 1, '2025-11-17 21:33:23'),
 (28, 1, 1, '2025-11-17 21:33:23'),
@@ -331,9 +331,13 @@ INSERT INTO `borrow` (`Id`, `BorrowDay`, `ExpireDay`, `ReturnDateTime`, `UserId`
 (6, '2025-10-15 06:00:00', '2025-10-29 06:00:00', '2025-10-28 03:00:00', 4, 3, 1),
 (7, '2025-11-09 11:20:00', '2025-11-23 11:20:00', NULL, 2, 32, 0),
 (8, '2025-09-28 01:00:00', '2025-10-12 01:00:00', NULL, 3, 27, 2),
-(9, '2025-11-02 05:15:00', '2025-11-16 05:15:00', NULL, 1, 29, 0),
+(9, '2025-11-02 05:15:00', '2025-11-16 05:15:00', NULL, 1, 29, 2),
 (10, '2025-10-30 02:45:00', '2025-11-13 02:45:00', '2025-11-10 03:00:00', 2, 22, 1),
-(11, '2025-11-17 22:05:42', '2025-12-01 22:05:42', NULL, 4, 14, 0);
+(11, '2025-11-17 22:05:42', '2025-12-01 22:05:42', NULL, 4, 14, 0),
+(12, '2025-11-17 22:42:39', '2025-12-01 22:42:39', NULL, 8, 9, 0),
+(13, '2025-11-17 22:42:46', '2025-12-01 22:42:46', NULL, 8, 10, 0),
+(14, '2025-11-18 12:49:17', '2025-12-02 12:49:17', NULL, 8, 25, 0),
+(15, '2025-11-18 13:24:50', '2025-12-02 13:24:50', NULL, 8, 3, 0);
 
 -- --------------------------------------------------------
 
@@ -356,7 +360,11 @@ CREATE TABLE `borrow_audit` (
 --
 
 INSERT INTO `borrow_audit` (`Id`, `BorrowId`, `UserId`, `BookId`, `Action`, `Note`, `CreatedAt`) VALUES
-(1, 11, 4, 14, 'borrow', NULL, '2025-11-17 22:05:42');
+(1, 11, 4, 14, 'borrow', NULL, '2025-11-17 22:05:42'),
+(2, 12, 8, 9, 'borrow', NULL, '2025-11-17 22:42:39'),
+(3, 13, 8, 10, 'borrow', NULL, '2025-11-17 22:42:46'),
+(4, 14, 8, 25, 'borrow', NULL, '2025-11-18 12:49:17'),
+(5, 15, 8, 3, 'borrow', NULL, '2025-11-18 13:24:50');
 
 -- --------------------------------------------------------
 
@@ -536,7 +544,8 @@ INSERT INTO `user` (`Id`, `UserName`, `Email`, `PhoneNumber`, `Password`, `Role`
 (1, 'admin', 'admin@library.com', 901234567, 'admin123', 1, '2025-11-09 20:32:58'),
 (2, 'john_doe', 'john@example.com', 901234568, 'user123', 0, '2025-11-09 20:32:58'),
 (3, 'admin1', 'admin1@gmail.com', 123456789, '$2a$10$C/oOJ5hHTs5A2t1hPN.jEOrC/ZmsIttpMaBRme2I3wK8HF0fyvJ5W', 1, '2025-11-09 20:42:54'),
-(4, 'Vu Duc Huy', 'huy@gmail.com', 965904537, '$2a$10$xOZKAcKmXFPSlZ0rGdgtgutSe94QCplannnNAzss57vOooWkSPoYq', 0, '2025-11-09 21:20:12');
+(4, 'Vu Duc Huy', 'huy@gmail.com', 965904537, '$2a$10$xOZKAcKmXFPSlZ0rGdgtgutSe94QCplannnNAzss57vOooWkSPoYq', 0, '2025-11-09 21:20:12'),
+(8, 'Huyen', 'Huyen@gmail.com', 5151515151, '$2a$10$fV8ePhb1q5y5nu1jRR.tbOi4/5arrem6u2N7UZmUnMHCeazeikS3.', 0, '2025-11-17 22:41:29');
 
 --
 -- Chỉ mục cho các bảng đã đổ
@@ -666,13 +675,13 @@ ALTER TABLE `book`
 -- AUTO_INCREMENT cho bảng `borrow`
 --
 ALTER TABLE `borrow`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT cho bảng `borrow_audit`
 --
 ALTER TABLE `borrow_audit`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT cho bảng `category`
@@ -696,7 +705,7 @@ ALTER TABLE `shelves`
 -- AUTO_INCREMENT cho bảng `user`
 --
 ALTER TABLE `user`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- Các ràng buộc cho các bảng đã đổ

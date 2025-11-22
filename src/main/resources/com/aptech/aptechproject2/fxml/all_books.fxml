@@ -1,25 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
 
 <BorderPane xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
+            xmlns:fx="http://javafx.com/fxml/1"
             fx:controller="com.aptech.aptechproject2.Controller.AllBooksController"
             style="-fx-padding: 20; -fx-background-color: #f8f9fa;">
 
-    <!-- Center: All books grid -->
     <center>
         <VBox spacing="10">
             <Label text="Tất cả sách" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
 
-            <!-- Back button -->
-            <Button text="Quay lại" onAction="#onBack"/>
+            <!-- Header with search, filter, back -->
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Tìm theo tên sách" prefWidth="200"/>
+                <Button text="Tìm" onAction="#onSearch"/>
+                <ComboBox fx:id="filterCombo" prefWidth="150"/>
+                <ComboBox fx:id="subFilterCombo" prefWidth="150" visible="false"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button text="Quay lại" onAction="#onBack"/>
+            </HBox>
 
-            <!-- All books grid -->
+            <!-- Books grid -->
             <ScrollPane fitToWidth="true">
                 <GridPane fx:id="allBooksGrid" hgap="20" vgap="20"/>
             </ScrollPane>
+
+            <!-- Pagination -->
+            <HBox spacing="10" alignment="CENTER">
+                <Button fx:id="prevBtn" text="◀ Trước" onAction="#onPrev"/>
+                <Label fx:id="pageLabel" text="Trang 1/1"/>
+                <Button fx:id="nextBtn" text="Sau ▶" onAction="#onNext"/>
+            </HBox>
         </VBox>
     </center>
 

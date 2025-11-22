@@ -143,4 +143,168 @@ public class BookDAO {
         }
         return books;
     }
+
+    public List<Book> getBooksPaginated(int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM book ORDER BY Id ASC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public int getTotalBooksCount() {
+        String sql = "SELECT COUNT(*) FROM book";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Book> searchBooksByTitlePaginated(String keyword, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT * FROM book WHERE Title LIKE ? ORDER BY Id ASC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public int getSearchBooksCount(String keyword) {
+        String sql = "SELECT COUNT(*) FROM book WHERE Title LIKE ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Book> getBooksByCategory(int categoryId, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.* FROM book b JOIN bookcategory bc ON b.Id = bc.BookId " +
+                "WHERE bc.CategoryId = ? ORDER BY b.Id ASC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public int getBooksCountByCategory(int categoryId) {
+        String sql = "SELECT COUNT(*) FROM book b JOIN bookcategory bc ON b.Id = bc.BookId WHERE bc.CategoryId = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Book> getBooksByAuthor(int authorId, int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.* FROM book b JOIN bookauthor ba ON b.Id = ba.BookId " +
+                "WHERE ba.AuthorId = ? ORDER BY b.Id ASC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, authorId);
+            ps.setInt(2, limit);
+            ps.setInt(3, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public int getBooksCountByAuthor(int authorId) {
+        String sql = "SELECT COUNT(*) FROM book b JOIN bookauthor ba ON b.Id = ba.BookId WHERE ba.AuthorId = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, authorId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    public List<Book> getBooksByBorrowCount(int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, COUNT(br.Id) AS borrow_count " +
+                "FROM book b LEFT JOIN borrow br ON b.Id = br.BookId " +
+                "GROUP BY b.Id ORDER BY borrow_count DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                books.add(extractBook(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public List<Book> getBooksByAverageRating(int limit, int offset) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, AVG(r.Rating) AS avg_rating " +
+                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
+                "GROUP BY b.Id ORDER BY avg_rating DESC LIMIT ? OFFSET ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            ps.setInt(2, offset);
+            ResultSet rs = ps.executeQuery();
+            while (rs.next()) {
+                Book book = extractBook(rs);
+                book.setAverageRating(rs.getDouble("avg_rating"));
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
 }

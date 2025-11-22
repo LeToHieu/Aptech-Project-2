@@ -10,7 +10,7 @@ import org.mindrot.jbcrypt.BCrypt;
 
 public class RegisterController {
 
-    @FXML private TextField usernameField, emailField, phoneField; // Thêm phoneField
+    @FXML private TextField usernameField, emailField, phoneField;
     @FXML private PasswordField passwordField, confirmPasswordField;
     @FXML private Label errorLabel;
 
@@ -24,12 +24,43 @@ public class RegisterController {
         String pass = passwordField.getText();
         String confirm = confirmPasswordField.getText();
 
+
         if (username.isEmpty() || email.isEmpty() || phone.isEmpty() || pass.isEmpty() || confirm.isEmpty()) {
             errorLabel.setText("❌ Vui lòng điền đầy đủ!");
             return;
         }
 
-        // Kiểm tra trùng
+
+        if (!username.matches("^[A-Z][a-zA-Z0-9_]{2,}$")) {
+            errorLabel.setText("❌ Username phải viết hoa chữ cái đầu và dài hơn 2 ký tự!");
+            return;
+        }
+
+
+        if (!email.matches("^[A-Za-z0-9._%+-]+@(gmail\\.com|email\\.com)$")) {
+            errorLabel.setText("❌ Email chỉ chấp nhận @gmail.com hoặc @email.com!");
+            return;
+        }
+
+
+        if (!phone.matches("^[0-9]{10}$")) {
+            errorLabel.setText("❌ Số điện thoại phải đúng 10 chữ số!");
+            return;
+        }
+
+
+        if (pass.length() < 6) {
+            errorLabel.setText("❌ Mật khẩu phải có ít nhất 6 ký tự!");
+            return;
+        }
+
+
+        if (!pass.equals(confirm)) {
+            errorLabel.setText("❌ Mật khẩu không khớp!");
+            return;
+        }
+
+
         if (userDAO.getByUsername(username) != null) {
             errorLabel.setText("❌ Username đã tồn tại!");
             return;
@@ -43,13 +74,9 @@ public class RegisterController {
             return;
         }
 
-        if (!pass.equals(confirm)) {
-            errorLabel.setText("❌ Mật khẩu không khớp!");
-            return;
-        }
 
         String hash = BCrypt.hashpw(pass, BCrypt.gensalt());
-        User newUser = new User(username, email, phone, hash, 2); // Role 2 = User
+        User newUser = new User(username, email, phone, hash, 2);
 
         if (userDAO.create(newUser)) {
             showAlert(Alert.AlertType.INFORMATION, "Đăng ký thành công!");
