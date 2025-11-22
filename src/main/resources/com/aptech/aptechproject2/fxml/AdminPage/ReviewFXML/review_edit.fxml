@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.ReviewController.EditReviewController"
+      spacing="15" prefWidth="400" style="-fx-padding: 20; -fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 8;">
+
+    <Label text="SỬA ĐÁNH GIÁ" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+    <Separator />
+
+    <Label text="Người dùng:"/>
+    <TextField fx:id="userField" editable="false" style="-fx-background-color: #f0f0f0;"/>
+
+    <Label text="Sách:"/>
+    <TextField fx:id="bookField" editable="false" style="-fx-background-color: #f0f0f0;"/>
+
+    <Label text="Đánh giá (1-5 sao):"/>
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Slider fx:id="ratingSlider" min="1" max="5" value="3" showTickLabels="true" showTickMarks="true" majorTickUnit="1" minorTickCount="0"/>
+        <Label fx:id="ratingLabel" text="★★★☆☆" style="-fx-font-size: 16;"/>
+    </HBox>
+
+    <Label text="Bình luận:"/>
+    <TextArea fx:id="commentArea" promptText="Nhập nội dung đánh giá..." wrapText="true" prefRowCount="4"/>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdate"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button text="Hủy" onAction="#onCancel"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>

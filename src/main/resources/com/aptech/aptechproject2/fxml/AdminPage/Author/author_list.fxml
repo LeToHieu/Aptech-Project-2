@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.control.cell.PropertyValueFactory?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.AuthorController.AuthorListController">
+    <center>
+        <VBox spacing="20" style="-fx-padding: 10;">
+            <Label text="DANH SÁCH TÁC GIẢ" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Tìm theo tên/mô tả" prefWidth="300"/>
+                <!--Button text="Tìm" onAction="#onSearch"/-->
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="addBtn" text="Thêm" onAction="#onAdd"/>
+                <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
+                <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
+            </HBox>
+            <TableView fx:id="authorTable" prefHeight="500">
+                <columns>
+                    <TableColumn fx:id="idCol" text="ID" prefWidth="50" />
+                    <TableColumn fx:id="nameCol" text="Tên" prefWidth="200" />
+                    <TableColumn fx:id="descriptionCol" text="Mô tả" prefWidth="300" />
+                    <TableColumn fx:id="imageCol" text="Hình Ảnh" prefWidth="200" />  <!-- Rộng hơn cho preview -->
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>

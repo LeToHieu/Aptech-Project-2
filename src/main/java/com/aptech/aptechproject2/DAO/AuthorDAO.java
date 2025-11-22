@@ -72,7 +72,7 @@ public class AuthorDAO {
     }
 
     public boolean delete(int id) {
-        String sql = "DELETE FROM author WHERE Id = ?";
+        String sql = "DELETE FROM author WHERE   = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
             stmt.setInt(1, id);

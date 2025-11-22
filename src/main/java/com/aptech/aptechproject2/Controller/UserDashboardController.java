@@ -64,7 +64,7 @@ public class UserDashboardController {
         box.setSpacing(5);
 
         try {
-            String path = "src/main/resources/com/aptech/aptechproject2/" + book.getImage();
+            String path = "/com/aptech/aptechproject2/images/" + book.getImage();
             ImageView imageView = new ImageView(new Image(new FileInputStream(path)));
             imageView.setFitWidth(120);
             imageView.setFitHeight(160);
@@ -263,7 +263,7 @@ public class UserDashboardController {
                 new Label("Mật khẩu:"), passwordField,
                 updateBtn, backBtn
         );
-
+    
         booksGrid.add(form, 0, 0);
     }
 

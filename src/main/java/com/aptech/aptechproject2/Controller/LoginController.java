@@ -32,9 +32,9 @@ public class LoginController {
             // Phân trang theo role (sửa logic cho đúng với getRoleName: 1=Admin → admin_dashboard, 0=User hoặc 2=Librarian → user_dashboard)
             int role = user.getRole();
             if (role == 2|| role == 1) {
-                SceneManager.loadScene("/com/aptech/aptechproject2/fxml/admin_dashboard.fxml", usernameField.getScene());
+                SceneManager.loadScene("/com/aptech/aptechproject2/fxml/AdminPage/admin_dashboard.fxml", usernameField.getScene());
             } else if (role == 0) {
-                SceneManager.loadScene("/com/aptech/aptechproject2/fxml/user_dashboard.fxml", usernameField.getScene());
+                    SceneManager.loadScene("/com/aptech/aptechproject2/fxml/user_dashboard.fxml", usernameField.getScene());
             } else {
                 showAlert(Alert.AlertType.ERROR, "Vai trò không hợp lệ!");
             }

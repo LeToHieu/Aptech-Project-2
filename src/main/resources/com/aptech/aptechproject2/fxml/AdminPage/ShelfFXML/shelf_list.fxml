@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.ShelfController.ShelvesListController">
+    <top>
+        <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: #f8f9fa;">
+            <Label text="KỆ SÁCH CÁ NHÂN" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
+            <HBox spacing="10">
+                <Button fx:id="addBtn" text="Tạo Kệ" onAction="#onAdd"/>
+                <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
+                <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
+                <Button fx:id="viewBtn" text="Xem Sách" onAction="#onView"/>
+                <Region HBox.hgrow="ALWAYS"/>
+            </HBox>
+        </VBox>
+    </top>
+    <center>
+        <TableView fx:id="shelfTable">
+            <columns>
+                <TableColumn fx:id="nameCol" text="Tên Kệ" prefWidth="200"/>
+                <TableColumn fx:id="userCol" text="Người dùng" prefWidth="150"/>
+                <TableColumn fx:id="descCol" text="Mô tả" prefWidth="250"/>
+                <TableColumn fx:id="countCol" text="Số sách" prefWidth="100"/>
+                <TableColumn fx:id="timeCol" text="Tạo lúc" prefWidth="150"/>
+            </columns>
+        </TableView>
+    </center>
+</BorderPane>

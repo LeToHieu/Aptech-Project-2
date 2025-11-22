@@ -16,7 +16,7 @@ public class ReviewDAO {
             FROM Review r
             JOIN `User` u ON r.UserId = u.Id
             JOIN Book b ON r.BookId = b.Id
-            ORDER BY r.CreateAt DESC
+            ORDER BY r.CreateTime DESC
             """;
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -74,7 +74,7 @@ public class ReviewDAO {
         r.setBookId(rs.getLong("BookId"));
         r.setRating(rs.getInt("Rating"));
         r.setComment(rs.getString("Comment"));
-        r.setCreatedAt(rs.getTimestamp("CreateAt"));
+        r.setCreatedAt(rs.getTimestamp("CreateTime"));
         r.setUserName(rs.getString("UserName"));
         r.setBookTitle(rs.getString("Title"));
         return r;
