@@ -1,9 +1,15 @@
 package com.aptech.aptechproject2.DAO;
 
+import com.aptech.aptechproject2.Model.Review;
+import com.aptech.aptechproject2.Ulti.DBUtil;
+
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
+
+
 public class ReviewDAO {
-<<<<<<< Updated upstream
-}
-=======
+
 
     public List<Review> getAllReviews() {
         List<Review> reviews = new ArrayList<>();
@@ -12,7 +18,7 @@ public class ReviewDAO {
             FROM Review r
             JOIN `User` u ON r.UserId = u.Id
             JOIN Book b ON r.BookId = b.Id
-            ORDER BY r.CreateAt DESC
+            ORDER BY r.CreateTime DESC
             """;
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql);
@@ -104,4 +110,4 @@ public class ReviewDAO {
         return r;
     }
 }
->>>>>>> Stashed changes
+

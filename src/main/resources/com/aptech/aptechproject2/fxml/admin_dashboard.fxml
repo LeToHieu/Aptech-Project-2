@@ -9,7 +9,10 @@
 <?import javafx.scene.layout.StackPane?>
 <?import javafx.scene.layout.VBox?>
 
-<BorderPane prefHeight="632.0" prefWidth="1052.0" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aptech.aptechproject2.Controller.AdminDashboardController">
+<BorderPane minWidth="900" minHeight="550" prefWidth="1090" prefHeight="632"
+            xmlns="http://javafx.com/javafx/25"
+            xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="com.aptech.aptechproject2.Controller.AdminDashboardController">
 
     <!-- TOP BAR -->
     <top>
@@ -22,38 +25,24 @@
 
     <!-- LEFT MENU -->
     <left>
-        <VBox spacing="10" style="-fx-background-color: #34495e; -fx-padding: 20;">
+        <VBox spacing="10" minWidth="200" maxWidth="200" style="-fx-background-color: #34495e; -fx-padding: 20;">
             <Label style="-fx-text-fill: #bdc3c7; -fx-font-size: 14; -fx-font-weight: bold;" text="QUẢN LÝ" />
 
-            <Button fx:id="usersBtn" alignment="CENTER_LEFT" onAction="#showUsers" prefWidth="200" styleClass="menu-btn" text=" Người dùng">
-                <graphic>
-                    <Label style="-fx-text-fill: white;" text="[User Icon]" />
-                </graphic>
-            </Button>
-
-            <Button fx:id="booksBtn" alignment="CENTER_LEFT" onAction="#showBooks" prefWidth="200" styleClass="menu-btn" text=" Sách">
-                <graphic>
-                    <Label style="-fx-text-fill: white;" text="[Book Icon]" />
-                </graphic>
-            </Button>
-
-            <Button fx:id="authorsBtn" alignment="CENTER_LEFT" onAction="#showAuthors" prefWidth="200" styleClass="menu-btn" text=" Tác giả">
-                <graphic>
-                    <Label style="-fx-text-fill: white;" text="[Author Icon]" />
-                </graphic>
-            </Button>
+            <Button fx:id="usersBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showUsers" styleClass="menu-btn" text=" Người dùng"/>
+            <Button fx:id="booksBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showBooks" styleClass="menu-btn" text=" Sách"/>
+            <Button fx:id="authorsBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showAuthors" styleClass="menu-btn" text=" Tác giả"/>
+            <Button fx:id="categoriesBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showCategories" styleClass="menu-btn" text=" Thể loại"/>
+            <Button fx:id="borrowsBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showBorrows" styleClass="menu-btn" text=" Mượn/Trả"/>
+            <Button fx:id="reviewsBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showReviews" styleClass="menu-btn" text=" Đánh giá"/>
+            <Button fx:id="shelvesBtn" maxWidth="Infinity" alignment="CENTER_LEFT" onAction="#showShelves" styleClass="menu-btn" text=" Kệ sách"/>
 
             <Separator style="-fx-background-color: #2c3e50;" />
-
-            <Button onAction="#onLogout" prefWidth="200" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text=" Đăng xuất" />
+            <Button onAction="#onLogout" maxWidth="Infinity" style="-fx-background-color: #e74c3c; -fx-text-fill: white;" text=" Đăng xuất" />
         </VBox>
     </left>
 
-    <!-- CENTER: NỘI DUNG ĐỘNG -->
+    <!-- CENTER -->
     <center>
-        <StackPane fx:id="contentArea" prefHeight="1000.0" prefWidth="1000.0" style="-fx-padding: 20;">
-            <!-- Nội dung sẽ được load động vào đây -->
-        </StackPane>
+        <StackPane fx:id="contentArea" style="-fx-padding: 20;" />
     </center>
-
 </BorderPane>
