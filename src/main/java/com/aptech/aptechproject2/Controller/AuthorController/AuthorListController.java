@@ -48,16 +48,22 @@ public class AuthorListController {
                 if (empty || imagePath == null) {
                     setGraphic(null);
                 } else {
-                    try {
-                        Image image = new Image(getClass().getResourceAsStream(imagePath));
+                    Image image = loadImage(imagePath);
+                    if (image != null) {
                         imageView.setImage(image);
                         imageView.setFitWidth(50);  // Kích thước nhỏ trong table
                         imageView.setFitHeight(50);
                         imageView.setPreserveRatio(true);
                         setGraphic(imageView);
-                    } catch (Exception e) {
-                        setText(imagePath);  // Nếu load lỗi, hiển thị path text
-                        setGraphic(null);
+                        setText(null);
+                    } else {
+                        Image fallback = loadImage("/images/no_image.jpg");
+                        imageView.setImage(fallback != null ? fallback : null);
+                        imageView.setFitWidth(50);
+                        imageView.setFitHeight(50);
+                        imageView.setPreserveRatio(true);
+                        setGraphic(imageView);
+                        setText(null);
                     }
                 }
             }
@@ -66,6 +72,14 @@ public class AuthorListController {
 
         loadAuthors();
         searchField.textProperty().addListener((obs, old, newVal) -> filterAuthors(newVal));
+    }
+
+    private Image loadImage(String path) {
+        try {
+            return new Image(getClass().getResourceAsStream(path));
+        } catch (Exception e) {
+            return null;
+        }
     }
 
     private void loadAuthors() {

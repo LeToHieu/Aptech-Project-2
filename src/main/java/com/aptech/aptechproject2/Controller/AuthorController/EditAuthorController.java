@@ -13,8 +13,6 @@ import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.stage.Stage;
 
-import java.io.InputStream;
-
 public class EditAuthorController {
 
     @FXML private TextField nameField;
@@ -33,24 +31,24 @@ public class EditAuthorController {
         nameField.setText(author.getName());
         descriptionField.setText(author.getDescription());
         imagePath = author.getImage();
-        if (imagePath != null && !imagePath.isEmpty()) {
-            InputStream is = getClass().getResourceAsStream(imagePath);
 
-            if (is != null) {
-                // Load ảnh thật
-                Image image = new Image(is);
-                System.out.println("imagePath is: " + imagePath);
-
-                imagePreview.setImage(image);
-            } else {
-                // File không tồn tại → dùng ảnh mặc định
-                Image fallback = new Image(getClass().getResourceAsStream("/images/no_image.jpg"));
-                imagePreview.setImage(fallback);
-            }
+        Image image = loadImage(imagePath);
+        if (image != null) {
+            imagePreview.setImage(image);
         } else {
-            // Không có đường dẫn → hiển thị ảnh mặc định
-            Image fallback = new Image(getClass().getResourceAsStream("/images/no_image.jpg"));
+            Image fallback = loadImage("/images/no_image.jpg");
             imagePreview.setImage(fallback);
+        }
+    }
+
+    private Image loadImage(String path) {
+        if (path == null || path.isEmpty()) {
+            return null;
+        }
+        try {
+            return new Image(getClass().getResourceAsStream(path));
+        } catch (Exception e) {
+            return null;
         }
     }
 
