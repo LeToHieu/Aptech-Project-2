@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.ImageView?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.BookController.EditBookController"
+      spacing="10" prefWidth="500" prefHeight="600" style="-fx-padding: 20; -fx-background-color: white;">
+
+    <Label text="Sửa Thông Tin Sách" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <Label text="Tựa đề:"/>
+    <TextField fx:id="titleField" promptText="Title"/>
+
+    <Label text="Mô tả:"/>
+    <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
+
+    <Label text="Hình ảnh:"/>
+    <HBox spacing="10">
+        <Button text="Chọn Hình Ảnh" onAction="#onChooseImage"/>
+        <ImageView fx:id="imagePreview" fitWidth="150" fitHeight="150"/>
+    </HBox>
+
+    <Label text="URL (Xem trước sách):"/>
+    <TextField fx:id="urlField" promptText="URL"/>
+
+    <Label text="Tác giả:"/>
+    <HBox spacing="10">
+        <Button text="+" onAction="#onAddAuthors"/>
+        <ListView fx:id="selectedAuthorsList" prefHeight="100"/>
+    </HBox>
+
+    <Label text="Thể loại:"/>
+    <HBox spacing="10">
+        <Button text="+" onAction="#onAddCategories"/>
+        <ListView fx:id="selectedCategoriesList" prefHeight="100"/>
+    </HBox>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdateBook"/>
+        <Button text="Hủy" onAction="#onCancel"/>
+    </HBox>
+</VBox>

@@ -15,14 +15,19 @@ import javafx.fxml.FXMLLoader;
 import javafx.geometry.Insets;
 import javafx.scene.Cursor;
 import javafx.scene.Scene;
+import javafx.scene.effect.DropShadow;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
 import javafx.scene.text.Text;
+import javafx.fxml.FXMLLoader;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.animation.ScaleTransition;
+import javafx.util.Duration;
 
 import java.io.FileInputStream;
 import java.util.List;
@@ -50,6 +55,7 @@ public class AllBooksController {
 
     @FXML
     public void initialize() {
+        loadBooks();
         filterCombo.setItems(FXCollections.observableArrayList(
                 "Không lọc", "Lọc theo thể loại", "Lọc theo tác giả", "Lọc theo số lượt mượn", "Lọc theo đánh giá"
         ));
@@ -197,6 +203,7 @@ public class AllBooksController {
 
         try {
             String path = "src/main/resources/com/aptech/aptechproject2/" + book.getImage();
+
             ImageView imageView = new ImageView(new Image(new FileInputStream(path)));
             imageView.setFitWidth(120);
             imageView.setFitHeight(160);

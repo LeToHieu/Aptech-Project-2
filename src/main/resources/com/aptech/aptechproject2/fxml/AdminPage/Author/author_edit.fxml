@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<?import javafx.scene.image.ImageView?>
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.AuthorController.EditAuthorController"
+      spacing="10" prefWidth="300" prefHeight="300" style="-fx-padding: 20; -fx-background-color: white;">
+
+    <Label text="Sửa Thông Tin Tác Giả" style="-fx-font-size: 18; -fx-font-weight: bold;"/>
+
+    <Label text="Tên:"/>
+    <TextField fx:id="nameField" promptText="Name"/>
+
+    <Label text="Mô tả:"/>
+    <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
+
+    <Label text="Hình ảnh:"/>
+    <HBox spacing="10">
+        <Button text="Chọn Hình Ảnh" onAction="#onChooseImage"/>
+        <ImageView fx:id="imagePreview" fitWidth="150" fitHeight="150"/>
+    </HBox>
+
+    <Label fx:id="errorLabel" textFill="red" style="-fx-font-size: 12;"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdateAuthor"/>
+        <Button text="Hủy" onAction="#onCancel"/>
+    </HBox>
+</VBox>

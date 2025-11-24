@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="com.aptech.aptechproject2.Controller.ShelfController.EditShelfController"
+      spacing="15" prefWidth="400" style="-fx-padding: 20; -fx-background-color: white; -fx-border-color: #ddd; -fx-border-radius: 8;">
+
+    <Label text="SỬA KỆ SÁCH" style="-fx-font-size: 18; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
+
+    <Separator />
+
+    <Label text="Tên kệ:"/>
+    <TextField fx:id="nameField" promptText="Tên kệ sách..."/>
+
+    <Label text="Mô tả (tùy chọn):"/>
+    <TextArea fx:id="descArea" promptText="Mô tả về kệ..." wrapText="true" prefRowCount="3"/>
+
+    <HBox spacing="10" alignment="CENTER_RIGHT">
+        <Button text="Cập Nhật" onAction="#onUpdate"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+        <Button text="Hủy" onAction="#onCancel"
+                style="-fx-background-color: #95a5a6; -fx-text-fill: white;"/>
+    </HBox>
+</VBox>

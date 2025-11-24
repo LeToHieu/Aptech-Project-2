@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<BorderPane xmlns="http://javafx.com/javafx" xmlns:fx="http://javafx.com/fxml"
+            fx:controller="com.aptech.aptechproject2.Controller.BookController.BookListController">
+    <center>
+        <VBox spacing="20" style="-fx-padding: 10;">
+            <Label text="DANH SÁCH SÁCH" style="-fx-font-size: 20; -fx-font-weight: bold;" />
+            <HBox spacing="10" alignment="CENTER_LEFT">
+                <TextField fx:id="searchField" promptText="Tìm theo tựa đề/mô tả" prefWidth="300"/>
+                <Button text="Chọn Tác Giả" onAction="#onSelectAuthorsFilter"/>
+                <ListView fx:id="authorsFilterList" prefWidth="150" prefHeight="50"/>
+                <Button text="Chọn Thể Loại" onAction="#onSelectCategoriesFilter"/>
+                <ListView fx:id="categoriesFilterList" prefWidth="150" prefHeight="50"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Button fx:id="addBtn" text="Thêm" onAction="#onAdd"/>
+                <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
+                <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
+            </HBox>
+            <TableView fx:id="bookTable" prefHeight="500">
+                <columns>
+                    <TableColumn fx:id="idCol" text="ID" prefWidth="50" />
+                    <TableColumn fx:id="titleCol" text="Tựa đề" prefWidth="200" />
+                    <TableColumn fx:id="descriptionCol" text="Mô tả" prefWidth="300" />
+                    <TableColumn fx:id="imageCol" text="Image" prefWidth="150" />
+                    <TableColumn fx:id="urlCol" text="Xem trước" prefWidth="150" />
+                    <TableColumn fx:id="authorsCol" text="Tác Giả" prefWidth="200" />
+                    <TableColumn fx:id="categoriesCol" text="Thể Loại" prefWidth="200" />
+                    <TableColumn fx:id="createTimeCol" text="Create Time" prefWidth="150" />
+                    <TableColumn fx:id="updateTimeCol" text="Update Time" prefWidth="150" />
+                </columns>
+            </TableView>
+        </VBox>
+    </center>
+</BorderPane>
