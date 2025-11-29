@@ -23,6 +23,8 @@
                     <TableColumn fx:id="idCol" text="ID" prefWidth="50" />
                     <TableColumn fx:id="titleCol" text="Tựa đề" prefWidth="200" />
                     <TableColumn fx:id="descriptionCol" text="Mô tả" prefWidth="300" />
+                    <TableColumn fx:id="totalBookCol" text="Tổng Sách" prefWidth="100" />
+                    <TableColumn fx:id="borrowBookCol" text="Sách Mượn" prefWidth="100" />
                     <TableColumn fx:id="imageCol" text="Image" prefWidth="150" />
                     <TableColumn fx:id="urlCol" text="Xem trước" prefWidth="150" />
                     <TableColumn fx:id="authorsCol" text="Tác Giả" prefWidth="200" />

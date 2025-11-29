@@ -47,7 +47,7 @@ public class UserDashboardController {
     public void initialize() {
         Platform.runLater(() -> {
             Stage stage = (Stage) searchField.getScene().getWindow();
-            stage.setFullScreen(true);
+            stage.setFullScreen(false);
         });
 
         // Mặc định khi vào trang user_dashboard (Trang chủ) sẽ hiển thị TopRated

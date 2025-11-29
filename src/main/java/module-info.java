@@ -13,6 +13,7 @@ module com.aptech.aptechproject2 {
     requires java.desktop;
     requires javafx.graphics;
 
+
     opens com.aptech.aptechproject2 to javafx.fxml, javafx.base;
     opens com.aptech.aptechproject2.Controller to javafx.fxml, javafx.base;
     opens com.aptech.aptechproject2.Model to javafx.fxml, javafx.base; // nếu dùng FXML binding

@@ -1,3 +1,4 @@
+// EditBookController.java (Updated with TotalBook and BorrowBook handling)
 package com.aptech.aptechproject2.Controller.BookController;
 
 import com.aptech.aptechproject2.DAO.BookDAO;
@@ -6,7 +7,6 @@ import com.aptech.aptechproject2.Model.Book;
 import com.aptech.aptechproject2.Model.Category;
 import com.aptech.aptechproject2.Ulti.ImageUtil;
 import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -16,6 +16,7 @@ import javafx.scene.image.ImageView;
 import javafx.scene.layout.HBox;
 import javafx.stage.Modality;
 import javafx.stage.Stage;
+import javafx.collections.ObservableList;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +25,7 @@ import java.util.List;
 
 public class EditBookController {
 
-    @FXML private TextField titleField, urlField;
+    @FXML private TextField titleField, urlField, totalBookField, borrowBookField;
     @FXML private TextArea descriptionField;
     @FXML private ImageView imagePreview;
     @FXML private ListView<HBox> selectedAuthorsList, selectedCategoriesList;
@@ -40,6 +41,8 @@ public class EditBookController {
         this.bookToEdit = book;
         titleField.setText(book.getTitle());
         descriptionField.setText(book.getDescription());
+        totalBookField.setText(String.valueOf(book.getTotalBook()));
+        borrowBookField.setText(String.valueOf(book.getBorrowBook()));
         urlField.setText(book.getUrl());
         imagePath = book.getImage();
 
@@ -162,10 +165,21 @@ public class EditBookController {
     private void onUpdateBook() {
         String title = titleField.getText().trim();
         String description = descriptionField.getText().trim();
+        String totalBookStr = totalBookField.getText().trim();
+        String borrowBookStr = borrowBookField.getText().trim();
         String url = urlField.getText().trim();
 
         if (title.isEmpty()) {
             errorLabel.setText("Vui lòng điền ít nhất tựa đề!");
+            return;
+        }
+        int totalBook;
+        int borrowBook;
+        try {
+            totalBook = Integer.parseInt(totalBookStr);
+            borrowBook = Integer.parseInt(borrowBookStr);
+        } catch (NumberFormatException e) {
+            errorLabel.setText("Tổng sách và sách mượn phải là số nguyên!");
             return;
         }
 
@@ -178,6 +192,8 @@ public class EditBookController {
 
         bookToEdit.setTitle(title);
         bookToEdit.setDescription(description);
+        bookToEdit.setTotalBook(totalBook);
+        bookToEdit.setBorrowBook(borrowBook);
         bookToEdit.setImage(imagePath);
         bookToEdit.setUrl(url);
         bookToEdit.setAuthors(new ArrayList<>(selectedAuthors));

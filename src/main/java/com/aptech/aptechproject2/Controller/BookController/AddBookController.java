@@ -1,3 +1,4 @@
+// AddBookController.java (Updated with TotalBook and BorrowBook handling)
 package com.aptech.aptechproject2.Controller.BookController;
 
 import com.aptech.aptechproject2.DAO.BookDAO;
@@ -23,8 +24,7 @@ import java.util.List;
 
 public class AddBookController {
 
-    @FXML private TextField titleField;
-    @FXML private TextField urlField;
+    @FXML private TextField titleField, urlField, totalBookField, borrowBookField;
     @FXML private TextArea descriptionField;
     @FXML private ImageView imagePreview;
     @FXML private ListView<HBox> selectedAuthorsList;
@@ -156,10 +156,21 @@ public class AddBookController {
     private void onAddBook() {
         String title = titleField.getText().trim();
         String description = descriptionField.getText().trim();
+        String totalBookStr = totalBookField.getText().trim();
+        String borrowBookStr = borrowBookField.getText().trim();
         String url = urlField.getText().trim();
 
         if (title.isEmpty()) {
             errorLabel.setText("Vui lòng nhập ít nhất tựa đề sách!");
+            return;
+        }
+        int totalBook;
+        int borrowBook;
+        try {
+            totalBook = Integer.parseInt(totalBookStr);
+            borrowBook = Integer.parseInt(borrowBookStr);
+        } catch (NumberFormatException e) {
+            errorLabel.setText("Tổng sách và sách mượn phải là số nguyên!");
             return;
         }
 
@@ -175,6 +186,8 @@ public class AddBookController {
         Book newBook = new Book();
         newBook.setTitle(title);
         newBook.setDescription(description);
+        newBook.setTotalBook(totalBook);
+        newBook.setBorrowBook(borrowBook);
         newBook.setImage(imagePath);           // có thể null → DB chấp nhận NULL
         newBook.setUrl(url);
         newBook.setAuthors(new ArrayList<>(selectedAuthors));

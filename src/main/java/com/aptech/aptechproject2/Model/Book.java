@@ -1,3 +1,4 @@
+// Book.java (Updated with TotalBook and BorrowBook fields)
 package com.aptech.aptechproject2.Model;
 
 import java.sql.Timestamp;
@@ -9,6 +10,8 @@ public class Book {
     private int id;
     private String title;
     private String description;
+    private int totalBook;
+    private int borrowBook;
     private String image;
     private String url;
     private Timestamp createTime;
@@ -26,10 +29,12 @@ public class Book {
     public Book() {
     }
 
-    public Book(int id, String title, String description, String image, String url, Timestamp createTime, Timestamp updateTime) {
+    public Book(int id, String title, String description, int totalBook, int borrowBook, String image, String url, Timestamp createTime, Timestamp updateTime) {
         this.id = id;
         this.title = title;
         this.description = description;
+        this.totalBook = totalBook;
+        this.borrowBook = borrowBook;
         this.image = image;
         this.url = url;
         this.createTime = createTime;
@@ -46,7 +51,6 @@ public class Book {
         this.id = id;
     }
 
-
     public String getTitle() {
         return title;
     }
@@ -61,6 +65,22 @@ public class Book {
 
     public void setDescription(String description) {
         this.description = description;
+    }
+
+    public int getTotalBook() {
+        return totalBook;
+    }
+
+    public void setTotalBook(int totalBook) {
+        this.totalBook = totalBook;
+    }
+
+    public int getBorrowBook() {
+        return borrowBook;
+    }
+
+    public void setBorrowBook(int borrowBook) {
+        this.borrowBook = borrowBook;
     }
 
     public String getImage() {

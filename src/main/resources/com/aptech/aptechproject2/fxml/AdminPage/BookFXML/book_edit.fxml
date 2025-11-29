@@ -1,3 +1,4 @@
+<!-- book_edit.fxml (Updated with TotalBook and BorrowBook fields) -->
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -14,6 +15,12 @@
 
     <Label text="Mô tả:"/>
     <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
+
+    <Label text="Tổng Sách:"/>
+    <TextField fx:id="totalBookField" promptText="Total Books"/>
+
+    <Label text="Sách Mượn:"/>
+    <TextField fx:id="borrowBookField" promptText="Borrowed Books"/>
 
     <Label text="Hình ảnh:"/>
     <HBox spacing="10">

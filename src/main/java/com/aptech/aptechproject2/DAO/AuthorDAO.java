@@ -12,6 +12,7 @@ import java.util.List;
 
 public class AuthorDAO {
 
+
     public List<Author> getAllAuthors() {
         List<Author> authors = new ArrayList<>();
         String sql = "SELECT Id, Name, Description, Image FROM author";

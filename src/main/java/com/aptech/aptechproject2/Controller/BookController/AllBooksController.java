@@ -1,4 +1,4 @@
-// BookListController.java (Updated with TotalBook and BorrowBook columns)
+// AllBooksController.java (Optimized: Added pagination with pageSize=10, filters for authors/categories similar to SelectAuthors/SelectCategories with removable chips. Search uses searchBooks method. Data loaded dynamically. Average rating and available books calculated. Integrated with user_dashboard if needed via navigation.)
 package com.aptech.aptechproject2.Controller.BookController;
 
 import com.aptech.aptechproject2.DAO.BookDAO;
@@ -6,7 +6,8 @@ import com.aptech.aptechproject2.Model.Author;
 import com.aptech.aptechproject2.Model.Book;
 import com.aptech.aptechproject2.Model.Category;
 import com.aptech.aptechproject2.Ulti.SceneManager;
-import com.aptech.aptechproject2.Ulti.Session;
+import javafx.beans.property.SimpleDoubleProperty;
+import javafx.beans.property.SimpleIntegerProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -24,42 +25,50 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-public class BookListController {
+public class AllBooksController {
 
     @FXML private TableView<Book> bookTable;
     @FXML private TableColumn<Book, Integer> idCol, totalBookCol, borrowBookCol;
-    @FXML private TableColumn<Book, String> titleCol, descriptionCol, imageCol, urlCol, createTimeCol, updateTimeCol, authorsCol, categoriesCol;
+    @FXML private TableColumn<Book, String> titleCol, descriptionCol, authorsCol, categoriesCol;
+    @FXML private TableColumn<Book, Double> averageRatingCol;
+    @FXML private TableColumn<Book, Integer> availableCol; // New column for available books
     @FXML private TextField searchField;
-    @FXML private Button addBtn, editBtn, deleteBtn;
     @FXML private ListView<HBox> authorsFilterList, categoriesFilterList;
+    @FXML private Button prevPageBtn, nextPageBtn;
+    @FXML private Label pageLabel;
 
     private final BookDAO bookDAO = new BookDAO();
-    private ObservableList<Book> allBooks = FXCollections.observableArrayList();
-    private ObservableList<Book> filteredBooks = FXCollections.observableArrayList();
+    private ObservableList<Book> displayedBooks = FXCollections.observableArrayList();
     private ObservableList<Author> filterAuthors = FXCollections.observableArrayList();
     private ObservableList<Category> filterCategories = FXCollections.observableArrayList();
 
+    private int currentPage = 1;
+    private int pageSize = 10;
+    private int totalPages = 1;
+
     @FXML
     private void initialize() {
+        setupTableColumns();
+        setupFilterListViews();
+        searchField.textProperty().addListener((obs, oldVal, newVal) -> loadBooks(1)); // Reload on search change
+        loadBooks(currentPage);
+    }
+
+    private void setupTableColumns() {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         titleCol.setCellValueFactory(new PropertyValueFactory<>("title"));
         descriptionCol.setCellValueFactory(new PropertyValueFactory<>("description"));
         totalBookCol.setCellValueFactory(new PropertyValueFactory<>("totalBook"));
         borrowBookCol.setCellValueFactory(new PropertyValueFactory<>("borrowBook"));
-        imageCol.setCellValueFactory(new PropertyValueFactory<>("image"));
-        urlCol.setCellValueFactory(new PropertyValueFactory<>("url"));
-        createTimeCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getCreateTime() != null ? cellData.getValue().getCreateTime().toString() : ""));
-        updateTimeCol.setCellValueFactory(cellData -> new SimpleStringProperty(cellData.getValue().getUpdateTime() != null ? cellData.getValue().getUpdateTime().toString() : ""));
+        availableCol.setCellValueFactory(cellData -> new SimpleIntegerProperty(cellData.getValue().getTotalBook() - cellData.getValue().getBorrowBook()).asObject());
         authorsCol.setCellValueFactory(cellData -> new SimpleStringProperty(
                 cellData.getValue().getAuthors().stream().map(Author::getName).collect(Collectors.joining(", "))
         ));
         categoriesCol.setCellValueFactory(cellData -> new SimpleStringProperty(
                 cellData.getValue().getCategories().stream().map(Category::getName).collect(Collectors.joining(", "))
         ));
-
-        loadBooks();
-        searchField.textProperty().addListener((obs, old, newVal) -> filterBooks(newVal));
-        setupFilterListViews();
+        averageRatingCol.setCellValueFactory(cellData -> new SimpleDoubleProperty(cellData.getValue().getAverageRating()).asObject());
+        bookTable.setItems(displayedBooks);
     }
 
     private void setupFilterListViews() {
@@ -67,18 +76,58 @@ public class BookListController {
         categoriesFilterList.setItems(FXCollections.observableArrayList());
     }
 
-    private void loadBooks() {
-        List<Book> books = bookDAO.getAllBooks();
-        allBooks.setAll(books);
-        filteredBooks.setAll(allBooks);
-        bookTable.setItems(filteredBooks);
-    }
-
-    private void filterBooks(String keyword) {
+    private void loadBooks(int page) {
+        String keyword = searchField.getText().trim();
         List<Author> authors = new ArrayList<>(filterAuthors);
         List<Category> categories = new ArrayList<>(filterCategories);
-        List<Book> results = bookDAO.searchBooks(keyword, authors, categories);
-        filteredBooks.setAll(results);
+
+        // Use existing searchBooks for filtering, but add pagination logic
+        List<Book> allFilteredBooks = bookDAO.searchBooks(keyword, authors, categories);
+        int totalCount = allFilteredBooks.size();
+        totalPages = (int) Math.ceil((double) totalCount / pageSize);
+        currentPage = Math.max(1, Math.min(page, totalPages));
+
+        int offset = (currentPage - 1) * pageSize;
+        List<Book> paginatedBooks = allFilteredBooks.subList(
+                Math.min(offset, totalCount),
+                Math.min(offset + pageSize, totalCount)
+        );
+
+        // Calculate average rating if not set (assuming you have a method or query for it)
+        for (Book book : paginatedBooks) {
+            if (book.getAverageRating() == 0) {
+                book.setAverageRating(calculateAverageRating(book.getId())); // Implement if needed
+            }
+        }
+
+        displayedBooks.setAll(paginatedBooks);
+        updatePaginationControls();
+    }
+
+    private double calculateAverageRating(int bookId) {
+        // Placeholder: Implement query to get AVG(rating) from review table
+
+        return bookDAO.calculateAverageRating(bookId);
+    }
+
+    private void updatePaginationControls() {
+        pageLabel.setText("Trang " + currentPage + " / " + totalPages);
+        prevPageBtn.setDisable(currentPage <= 1);
+        nextPageBtn.setDisable(currentPage >= totalPages);
+    }
+
+    @FXML
+    private void onPrevPage() {
+        if (currentPage > 1) {
+            loadBooks(currentPage - 1);
+        }
+    }
+
+    @FXML
+    private void onNextPage() {
+        if (currentPage < totalPages) {
+            loadBooks(currentPage + 1);
+        }
     }
 
     @FXML
@@ -92,10 +141,10 @@ public class BookListController {
 
             SelectAuthorsController controller = loader.getController();
             List<Author> newAuthors = controller.getSelectedAuthors();
-            if (newAuthors != null) {
+            if (newAuthors != null && !newAuthors.isEmpty()) {
                 filterAuthors.addAll(newAuthors);
                 updateAuthorsFilterListView();
-                filterBooks(searchField.getText());
+                loadBooks(1);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,10 +162,10 @@ public class BookListController {
 
             SelectCategoriesController controller = loader.getController();
             List<Category> newCategories = controller.getSelectedCategories();
-            if (newCategories != null) {
+            if (newCategories != null && !newCategories.isEmpty()) {
                 filterCategories.addAll(newCategories);
                 updateCategoriesFilterListView();
-                filterBooks(searchField.getText());
+                loadBooks(1);
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -132,7 +181,7 @@ public class BookListController {
             removeBtn.setOnAction(e -> {
                 filterAuthors.remove(author);
                 updateAuthorsFilterListView();
-                filterBooks(searchField.getText());
+                loadBooks(currentPage);
             });
             hbox.getChildren().addAll(label, removeBtn);
             items.add(hbox);
@@ -149,7 +198,7 @@ public class BookListController {
             removeBtn.setOnAction(e -> {
                 filterCategories.remove(category);
                 updateCategoriesFilterListView();
-                filterBooks(searchField.getText());
+                loadBooks(currentPage);
             });
             hbox.getChildren().addAll(label, removeBtn);
             items.add(hbox);
@@ -157,85 +206,9 @@ public class BookListController {
         categoriesFilterList.setItems(items);
     }
 
+    // Navigation back to dashboard if needed
     @FXML
-    private void onAdd() {
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/AdminPage/BookFXML/book_add.fxml"));
-            Scene scene = new Scene(loader.load());
-            Stage stage = new Stage();
-            stage.setTitle("Thêm Sách");
-            stage.setScene(scene);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-            loadBooks();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onEdit() {
-        Book selected = bookTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Cảnh báo");
-            alert.setContentText("Vui lòng chọn một sách để sửa!");
-            alert.showAndWait();
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Xác nhận");
-        confirm.setContentText("Bạn có chắc chắn muốn sửa sách này?");
-        if (confirm.showAndWait().get() != ButtonType.OK) {
-            return;
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/AdminPage/BookFXML/book_edit.fxml"));
-            Scene scene = new Scene(loader.load());
-            EditBookController controller = loader.getController();
-            controller.setBook(selected);
-            Stage stage = new Stage();
-            stage.setTitle("Sửa Sách");
-            stage.setScene(scene);
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.showAndWait();
-            loadBooks();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onDelete() {
-        Book selected = bookTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            Alert alert = new Alert(Alert.AlertType.WARNING);
-            alert.setTitle("Cảnh báo");
-            alert.setContentText("Vui lòng chọn một sách để xóa!");
-            alert.showAndWait();
-            return;
-        }
-
-        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
-        confirm.setTitle("Xác nhận xóa");
-        confirm.setContentText("Bạn có chắc chắn muốn xóa sách này?");
-        if (confirm.showAndWait().get() == ButtonType.OK) {
-            if (bookDAO.delete(selected.getId())) {
-                loadBooks();
-            } else {
-                Alert error = new Alert(Alert.AlertType.ERROR);
-                error.setTitle("Lỗi");
-                error.setContentText("Xóa sách thất bại!");
-                error.showAndWait();
-            }
-        }
-    }
-
-    @FXML
-    private void onLogout() {
-        Session.clear();
-        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", bookTable.getScene());
+    private void onBackToDashboard() {
+        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/user_dashboard.fxml", bookTable.getScene());
     }
 }
