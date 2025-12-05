@@ -18,6 +18,7 @@ import javafx.stage.Modality;
 import javafx.stage.Stage;
 import javafx.collections.ObservableList;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
@@ -25,7 +26,7 @@ import java.util.List;
 
 public class EditBookController {
 
-    @FXML private TextField titleField, urlField, totalBookField, borrowBookField;
+    @FXML private TextField titleField, urlField, totalBookField;
     @FXML private TextArea descriptionField;
     @FXML private ImageView imagePreview;
     @FXML private ListView<HBox> selectedAuthorsList, selectedCategoriesList;
@@ -41,28 +42,12 @@ public class EditBookController {
         this.bookToEdit = book;
         titleField.setText(book.getTitle());
         descriptionField.setText(book.getDescription());
-        totalBookField.setText(String.valueOf(book.getTotalBook()));
-        borrowBookField.setText(String.valueOf(book.getBorrowBook()));
         urlField.setText(book.getUrl());
+        totalBookField.setText(String.valueOf(book.getTotalBook()));
         imagePath = book.getImage();
 
-        if (imagePath != null && !imagePath.isEmpty()) {
-            InputStream is = getClass().getResourceAsStream(imagePath);
+        ImageUtil.loadImageToView(imagePath, imagePreview);
 
-            if (is != null) {
-                // Load ảnh thật
-                Image image = new Image(is);
-                imagePreview.setImage(image);
-            } else {
-                // File không tồn tại → dùng ảnh mặc định
-                Image fallback = new Image(getClass().getResourceAsStream("/images/no_image.jpg"));
-                imagePreview.setImage(fallback);
-            }
-        } else {
-            // Không có đường dẫn → hiển thị ảnh mặc định
-            Image fallback = new Image(getClass().getResourceAsStream("/images/no_image.jpg"));
-            imagePreview.setImage(fallback);
-        }
 
         selectedAuthors.setAll(book.getAuthors());
         selectedCategories.setAll(book.getCategories());
@@ -166,8 +151,11 @@ public class EditBookController {
         String title = titleField.getText().trim();
         String description = descriptionField.getText().trim();
         String totalBookStr = totalBookField.getText().trim();
-        String borrowBookStr = borrowBookField.getText().trim();
-        String url = urlField.getText().trim();
+//        String borrowBookStr = borrowBookField.getText().trim();
+//        String url = urlField.getText().trim();
+        String url = urlField.getText() == null || urlField.getText().trim().isEmpty()
+                ? null
+                : urlField.getText().trim();
 
         if (title.isEmpty()) {
             errorLabel.setText("Vui lòng điền ít nhất tựa đề!");
@@ -177,7 +165,7 @@ public class EditBookController {
         int borrowBook;
         try {
             totalBook = Integer.parseInt(totalBookStr);
-            borrowBook = Integer.parseInt(borrowBookStr);
+//            borrowBook = Integer.parseInt(borrowBookStr);
         } catch (NumberFormatException e) {
             errorLabel.setText("Tổng sách và sách mượn phải là số nguyên!");
             return;
@@ -189,11 +177,16 @@ public class EditBookController {
         if (confirm.showAndWait().get() != ButtonType.OK) {
             return;
         }
+        String originalImagePath = bookToEdit.getImage();
+        if (imagePath != null && !imagePath.equals(originalImagePath)) {
+            ImageUtil.deleteImage(originalImagePath);
+        }
 
         bookToEdit.setTitle(title);
         bookToEdit.setDescription(description);
         bookToEdit.setTotalBook(totalBook);
-        bookToEdit.setBorrowBook(borrowBook);
+//        bookToEdit.setBorrowBook(borrowBook);
+//tôi muốn xóa hình ảnh đã tồn trưóc đó nếu mà hình ảnh không tồn tại thì bỏ qua lỗi
         bookToEdit.setImage(imagePath);
         bookToEdit.setUrl(url);
         bookToEdit.setAuthors(new ArrayList<>(selectedAuthors));

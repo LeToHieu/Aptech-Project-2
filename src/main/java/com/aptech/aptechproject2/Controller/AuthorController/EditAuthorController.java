@@ -32,13 +32,8 @@ public class EditAuthorController {
         descriptionField.setText(author.getDescription());
         imagePath = author.getImage();
 
-        Image image = loadImage(imagePath);
-        if (image != null) {
-            imagePreview.setImage(image);
-        } else {
-            Image fallback = loadImage("/images/no_image.jpg");
-            imagePreview.setImage(fallback);
-        }
+        ImageUtil.loadImageToView(imagePath, imagePreview);
+
     }
 
     private Image loadImage(String path) {
@@ -67,6 +62,11 @@ public class EditAuthorController {
         confirm.setContentText("Bạn có chắc chắn muốn sửa tác giả này?");
         if (confirm.showAndWait().get() != ButtonType.OK) {
             return;
+        }
+
+        String originalImagePath = authorToEdit.getImage();
+        if (imagePath != null && !imagePath.equals(originalImagePath)) {
+            ImageUtil.deleteImage(originalImagePath);
         }
 
         authorToEdit.setName(name);

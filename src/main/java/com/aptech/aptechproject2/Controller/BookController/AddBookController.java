@@ -157,7 +157,7 @@ public class AddBookController {
         String title = titleField.getText().trim();
         String description = descriptionField.getText().trim();
         String totalBookStr = totalBookField.getText().trim();
-        String borrowBookStr = borrowBookField.getText().trim();
+//        String borrowBookStr = borrowBookField.getText().trim();
         String url = urlField.getText().trim();
 
         if (title.isEmpty()) {
@@ -168,7 +168,7 @@ public class AddBookController {
         int borrowBook;
         try {
             totalBook = Integer.parseInt(totalBookStr);
-            borrowBook = Integer.parseInt(borrowBookStr);
+//            borrowBook = Integer.parseInt(borrowBookStr);
         } catch (NumberFormatException e) {
             errorLabel.setText("Tổng sách và sách mượn phải là số nguyên!");
             return;
@@ -187,7 +187,7 @@ public class AddBookController {
         newBook.setTitle(title);
         newBook.setDescription(description);
         newBook.setTotalBook(totalBook);
-        newBook.setBorrowBook(borrowBook);
+//        newBook.setBorrowBook(borrowBook);
         newBook.setImage(imagePath);           // có thể null → DB chấp nhận NULL
         newBook.setUrl(url);
         newBook.setAuthors(new ArrayList<>(selectedAuthors));

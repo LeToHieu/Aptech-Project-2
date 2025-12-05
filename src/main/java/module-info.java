@@ -12,6 +12,7 @@ module com.aptech.aptechproject2 {
     requires jbcrypt;
     requires java.desktop;
     requires javafx.graphics;
+//    requires com.aptech.aptechproject2;
 
 
     opens com.aptech.aptechproject2 to javafx.fxml, javafx.base;

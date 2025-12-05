@@ -50,7 +50,7 @@ public class BookDAO {
         return books;
     }
 
-    public List<Book> searchBooksByTitle(String keyword) {
+    /*public List<Book> searchBooksByTitle(String keyword) {
         List<Book> books = new ArrayList<>();
         String sql = "SELECT * FROM book WHERE Title LIKE ? ORDER BY CreateTime DESC";
         try (Connection conn = DBUtil.getConnection();
@@ -67,7 +67,7 @@ public class BookDAO {
             e.printStackTrace();
         }
         return books;
-    }
+    }*/
 
     public List<Book> searchBooks(String keyword, List<Author> authors, List<Category> categories) {
         List<Book> books = new ArrayList<>();
@@ -188,19 +188,7 @@ public class BookDAO {
         return false;
     }
 
-    Book extractBook(ResultSet rs) throws SQLException {
-        return new Book(
-                rs.getInt("Id"),
-                rs.getString("Title"),
-                rs.getString("Description"),
-                rs.getInt("TotalBook"),
-                rs.getInt("BorrowBook"),
-                rs.getString("Image"),
-                rs.getString("Url"),
-                rs.getTimestamp("CreateTime"),
-                rs.getTimestamp("UpdateTime")
-        );
-    }
+
 
     private List<Author> getAuthorsForBook(int bookId) {
         List<Author> authors = new ArrayList<>();
@@ -474,7 +462,110 @@ public class BookDAO {
         return 0.0;
     }
 
-    public List<Book> getTopRatedBooks(int i) {
-        return getAllBooks();
+
+    Book extractBook(ResultSet rs) throws SQLException {
+        Book book = new Book(
+                rs.getInt("Id"),
+                rs.getString("Title"),
+                rs.getString("Description"),
+                rs.getInt("TotalBook"),
+                rs.getInt("BorrowBook"),
+                rs.getString("Image"),
+                rs.getString("Url"),
+                rs.getTimestamp("CreateTime"),
+                rs.getTimestamp("UpdateTime")
+        );
+
+        // Cố gắng lấy averageRating
+        try {
+            // Kiểm tra cột có tồn tại không trước khi getDouble
+            ResultSetMetaData metaData = rs.getMetaData();
+            int columns = metaData.getColumnCount();
+            for (int i = 1; i <= columns; i++) {
+                if (metaData.getColumnName(i).equalsIgnoreCase("averageRating")) {
+                    book.setAverageRating(rs.getDouble("averageRating"));
+                    break;
+                }
+            }
+        } catch (SQLException e) {
+            // Bỏ qua lỗi nếu cột không tồn tại
+        }
+        return book;
+    }
+
+    /**
+     * Lấy danh sách sách được đánh giá cao nhất (Top Rated).
+     * Sắp xếp theo điểm trung bình rating giảm dần.
+     */
+    public List<Book> getTopRatedBooks(int limit) {
+        List<Book> books = new ArrayList<>();
+        // LEFT JOIN để bao gồm cả sách chưa có review (rating trung bình = 0)
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
+                "GROUP BY b.Id " +
+                "ORDER BY averageRating DESC, b.Title ASC " +
+                "LIMIT ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    books.add(extractBook(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    /**
+     * Lấy danh sách sách được mượn nhiều nhất.
+     * Sắp xếp theo trường BorrowBook giảm dần, có tính rating.
+     */
+    public List<Book> getMostBorrowedBooks(int limit) {
+        List<Book> books = new ArrayList<>();
+        // Lấy rating trung bình
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
+                "GROUP BY b.Id " +
+                "ORDER BY b.BorrowBook DESC, b.Title ASC " +
+                "LIMIT ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, limit);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    books.add(extractBook(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    /**
+     * Tìm kiếm sách theo tiêu đề, có tính rating.
+     */
+    public List<Book> searchBooksByTitle(String keyword) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
+                "WHERE b.Title LIKE ? " +
+                "GROUP BY b.Id " +
+                "ORDER BY b.Title ASC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, "%" + keyword + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    books.add(extractBook(rs));
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
     }
 }

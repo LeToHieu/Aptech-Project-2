@@ -1,105 +1,133 @@
 <?xml version="1.0" encoding="UTF-8"?>
+
 <?import javafx.geometry.Insets?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-<?import javafx.scene.text.*?>
-<?import javafx.scene.image.*?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Hyperlink?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.image.Image?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.text.Font?>
 
 <!-- Dùng ScrollPane bao toàn bộ để cuộn được -->
-<ScrollPane fitToWidth="true" fitToHeight="true" hbarPolicy="NEVER"
-            xmlns="http://javafx.com/javafx"
-            xmlns:fx="http://javafx.com/fxml"
-            fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController"
-            style="-fx-background: #f8f9fa;">
 
-    <VBox spacing="0" style="-fx-background-color: #f8f9fa;">
+<ScrollPane fitToHeight="true" fitToWidth="true" hbarPolicy="NEVER" style="-fx-background: #f8f9fa;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.aptech.aptechproject2.Controller.UserDashboardController">
+
+    <VBox prefWidth="1296.0" spacing="0" style="-fx-background-color: #f8f9fa;">
 
         <!-- ====================== THANH NAVIGATION TRÊN CÙNG (như Admin) ====================== -->
-        <HBox style="-fx-background-color: white; -fx-padding: 16 60;
-                     -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;"
-              alignment="CENTER_LEFT" spacing="40">
-            <Label text="THƯ VIỆN SÁCH TRỰC TUYẾN"
-                   style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-            <Region HBox.hgrow="ALWAYS"/>
-            <Hyperlink text="TRANG CHỦ"         onAction="#onHome"             styleClass="nav-link"/>
-            <Hyperlink text="TẤT CẢ SÁCH"       onAction="#onViewAllBooksFull" styleClass="nav-link"/>
-            <Hyperlink text="THỂ LOẠI"          onAction="#onViewCategories"   styleClass="nav-link"/>
-            <Hyperlink text="TÁC GIẢ"           onAction="#onViewAuthors"      styleClass="nav-link"/>
-            <Hyperlink text="THÔNG TIN CÁ NHÂN" onAction="#onViewUserInfo"     styleClass="nav-link"/>
-            <Button text="ĐĂNG XUẤT" onAction="#onLogout"
-                    style="-fx-background-color: #e74c3c; -fx-text-fill: white;
-                           -fx-font-weight: bold; -fx-padding: 10 28; -fx-background-radius: 30;"/>
+        <HBox alignment="CENTER_LEFT" spacing="40" style="-fx-background-color: white; -fx-padding: 16 60;                      -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;">
+            <Label style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="THƯ VIỆN SÁCH TRỰC TUYẾN" />
+            <Region HBox.hgrow="ALWAYS" />
+            <Hyperlink onAction="#onHome" styleClass="nav-link" text="TRANG CHỦ" />
+            <Hyperlink onAction="#onViewAllBooksFull" styleClass="nav-link" text="TẤT CẢ SÁCH" />
+            <Hyperlink onAction="#onViewCategories" styleClass="nav-link" text="THỂ LOẠI" />
+            <Hyperlink onAction="#onViewAuthors" styleClass="nav-link" text="TÁC GIẢ" />
+            <Hyperlink onAction="#onViewUserInfo" styleClass="nav-link" text="THÔNG TIN CÁ NHÂN" />
+            <Button onAction="#onLogout" style="-fx-background-color: #e74c3c; -fx-text-fill: white;                            -fx-font-weight: bold; -fx-padding: 10 28; -fx-background-radius: 30;" text="ĐĂNG XUẤT" />
         </HBox>
 
+        <!-- ====================== Đoạn dưới này cắt thành user_home_page.fxm ====================== -->
+
         <!-- ====================== HÌNH NỀN (giữ nguyên nhưng giới hạn chiều cao) ====================== -->
-        <StackPane maxHeight="320">
-            <ImageView fitWidth="-Infinity" preserveRatio="true">
+        <StackPane maxHeight="358.0" prefHeight="131.0" prefWidth="547.0">
+            <ImageView fitHeight="565.0" fitWidth="1300.0" preserveRatio="true">
                 <image>
-                    <Image url="@../images/Thumnail.jpg"/>
+                    <Image url="@../images/Thumnail.jpg" />
                 </image>
             </ImageView>
-            <StackPane style="-fx-background-color: rgba(0,0,0,0.5);"/>
-            <VBox alignment="CENTER" spacing="18" style="-fx-padding: 80;">
-                <Label text="THƯ VIỆN SÁCH TRỰC TUYẾN"
-                       style="-fx-font-size: 56px; -fx-font-weight: bold; -fx-text-fill: white;
-                              -fx-effect: dropshadow(gaussian, black, 10, 0, 2, 2);"/>
-                <Label text="Khám phá niềm vui đọc sách – Hàng ngàn đầu sách hay đang chờ bạn!"
-                       style="-fx-font-size: 24px; -fx-text-fill: #ecf0f1;"/>
-                <HBox spacing="20" alignment="CENTER" style="-fx-padding: 30 0;">
-                    <Button text="XEM TẤT CẢ SÁCH" onAction="#onViewAllBooksFull"
-                            style="-fx-background-color: #3498db; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 14 40; -fx-background-radius: 50;"/>
-                    <TextField fx:id="searchField" promptText="Tìm kiếm sách, tác giả..."
-                               prefWidth="380" prefHeight="48"
-                               style="-fx-background-radius: 50; -fx-padding: 0 20; -fx-font-size: 15px;"/>
-                    <Button text="TÌM KIẾM" onAction="#onSearch"
-                            style="-fx-background-color: #e67e22; -fx-text-fill: white;
-                                   -fx-font-weight: bold; -fx-padding: 14 38; -fx-background-radius: 50;"/>
-                </HBox>
-            </VBox>
+            <StackPane prefHeight="362.0" prefWidth="1300.0" style="-fx-background-color: rgba(0,0,0,0.5);">
+            <children>
+                  <VBox alignment="CENTER" prefHeight="27.0" prefWidth="1300.0" spacing="18" style="-fx-padding: 80;">
+                      <Label maxWidth="-Infinity" style="-fx-font-size: 56px; -fx-font-weight: bold; -fx-text-fill: white;                               -fx-effect: dropshadow(gaussian, black, 10, 0, 2, 2);" text="THƯ VIỆN SÁCH TRỰC TUYẾN">
+                     <font>
+                        <Font size="10.0" />
+                     </font>
+                  </Label>
+                      <Label style="-fx-font-size: 24px; -fx-text-fill: #ecf0f1;" text="Khám phá niềm vui đọc sách – Hàng ngàn đầu sách hay đang chờ bạn!" />
+                      <HBox alignment="CENTER" prefHeight="158.0" prefWidth="1186.0" spacing="20" style="-fx-padding: 30 0;">
+                          <Button onAction="#onViewAllBooksFull" style="-fx-background-color: #3498db; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-padding: 14 40; -fx-background-radius: 50;" text="XEM TẤT CẢ SÁCH" />
+                          <TextField fx:id="searchField" prefHeight="48" prefWidth="380" promptText="Tìm kiếm sách, tác giả..." style="-fx-background-radius: 50; -fx-padding: 0 20; -fx-font-size: 15px;" />
+                          <Button onAction="#onSearch" style="-fx-background-color: #e67e22; -fx-text-fill: white;                                    -fx-font-weight: bold; -fx-padding: 14 38; -fx-background-radius: 50;" text="TÌM KIẾM" />
+                      </HBox>
+                  </VBox>
+            </children></StackPane>
         </StackPane>
 
         <!-- ====================== NỘI DUNG CHÍNH – GIỚI HẠN CHIỀU RỘNG ====================== -->
-        <VBox style="-fx-padding: 70 0; -fx-background-color: #f8f9fa;" spacing="70">
+        <VBox alignment="CENTER" spacing="70" style="-fx-padding: 70 0; -fx-background-color: #f8f9fa;">
             <!-- Giới hạn chiều ngang tối đa 1400px, căn giữa -->
-            <VBox maxWidth="1400" alignment="CENTER" VBox.vgrow="ALWAYS">
+            <VBox alignment="CENTER" maxWidth="1400" VBox.vgrow="ALWAYS">
                 <padding>
-                    <Insets left="40" right="40"/>
+                    <Insets left="40" right="40" />
                 </padding>
 
                 <!-- Giới thiệu -->
                 <VBox alignment="CENTER" spacing="20">
-                    <Label text="Chào mừng bạn đến với Thư viện sách trực tuyến!"
-                           style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                    <Label text="Chúng tôi mang đến kho tàng tri thức khổng lồ với hàng ngàn đầu sách.\nMục tiêu: giúp mọi người dễ dàng tiếp cận sách hay và nuôi dưỡng thói quen đọc sách mỗi ngày."
-                           textAlignment="CENTER" wrapText="true"
-                           style="-fx-font-size: 19px; -fx-text-fill: #636e72; -fx-line-spacing: 6;"/>
+                    <Label style="-fx-font-size: 36px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="Chào mừng bạn đến với Thư viện sách trực tuyến!" />
+                    <Label style="-fx-font-size: 19px; -fx-text-fill: #636e72; -fx-line-spacing: 6;" text="Chúng tôi mang đến kho tàng tri thức khổng lồ với hàng ngàn đầu sách. Mục tiêu: giúp mọi người dễ dàng tiếp cận sách hay và nuôi dưỡng thói quen đọc sách mỗi ngày." textAlignment="CENTER" wrapText="true" />
                 </VBox>
 
-                <!-- Sách nổi bật -->
-                <VBox spacing="25">
-                    <Label text="SÁCH NỔI BẬT"
-                           style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                    <GridPane fx:id="booksGrid" hgap="35" vgap="45" alignment="CENTER"/>
+
+            <VBox spacing="0" style="-fx-background-color: #f8f9fa;">
+                <VBox spacing="70" style="-fx-padding: 30 60 70 60;">
+
+                    <VBox spacing="25">
+                        <Label style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="SÁCH ĐƯỢC ĐÁNH GIÁ CAO NHẤT" />
+                        <StackPane>
+                            <HBox fx:id="topRatedCarouselContainer" alignment="CENTER" prefHeight="373.0" prefWidth="1100.0" spacing="30">
+                           <padding>
+                              <Insets bottom="50.0" />
+                           </padding></HBox>
+
+                            <Button onAction="#prevTopRatedCarousel" styleClass="carousel-button" text="◀" StackPane.alignment="CENTER_LEFT" />
+                            <Button onAction="#nextTopRatedCarousel" styleClass="carousel-button" text="▶" StackPane.alignment="CENTER_RIGHT" />
+
+                                  <Label fx:id="topRatedCarouselPageLabel" prefHeight="42.0" prefWidth="38.0" style="-fx-font-size: 18px; -fx-text-fill: #7f8c8d;" text="1 / 1" StackPane.alignment="BOTTOM_CENTER" />
+                        </StackPane>
+                    </VBox>
+
+
+                    <VBox spacing="25">
+                        <Label style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" text="SÁCH ĐƯỢC MƯỢN NHIỀU NHẤT" />
+                        <StackPane prefHeight="373.0" prefWidth="1100.0">
+                            <HBox fx:id="mostBorrowedCarouselContainer" alignment="CENTER" prefHeight="326.0" prefWidth="1100.0" spacing="30">
+                           <padding>
+                              <Insets bottom="50.0" />
+                           </padding></HBox>
+
+                            <Button onAction="#prevMostBorrowedCarousel" styleClass="carousel-button" text="◀" StackPane.alignment="CENTER_LEFT" />
+                            <Button onAction="#nextMostBorrowedCarousel" styleClass="carousel-button" text="▶" StackPane.alignment="CENTER_RIGHT" />
+
+                                  <Label fx:id="mostBorrowedCarouselPageLabel" style="-fx-font-size: 18px; -fx-text-fill: #7f8c8d;" text="1 / 1" StackPane.alignment="BOTTOM_CENTER" />
+                        </StackPane>
+                    </VBox>
+
+                    <VBox spacing="25">
+                        <GridPane fx:id="topRatedGrid" alignment="CENTER" hgap="35" vgap="40" />
+                    </VBox>
+
                 </VBox>
 
-                <!-- Top 10 -->
-                <VBox spacing="25">
-                    <Label text="TOP 10 SÁCH ĐƯỢC YÊU THÍCH NHẤT"
-                           style="-fx-font-size: 30px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;"/>
-                    <GridPane fx:id="topRatedGrid" hgap="35" vgap="40" alignment="CENTER"/>
-                </VBox>
             </VBox>
 
+
+
+
+
             <!-- Footer -->
-            <HBox style="-fx-background-color: #2c3e50; -fx-padding: 35; -fx-spacing: 30;" alignment="CENTER">
-                <Label text="© 2025 Thư viện sách trực tuyến - Mang tri thức đến mọi nhà"
-                       style="-fx-text-fill: #bdc3c7; -fx-font-size: 14px;"/>
-                <Region HBox.hgrow="ALWAYS"/>
-                <Label text="Liên hệ: contact@thuvien.com | Hotline: 1900 1234"
-                       style="-fx-text-fill: #ecf0f1;"/>
+            <HBox alignment="CENTER" style="-fx-background-color: #2c3e50; -fx-padding: 35; -fx-spacing: 30;">
+                <Label style="-fx-text-fill: #bdc3c7; -fx-font-size: 14px;" text="© 2025 Thư viện sách trực tuyến - Mang tri thức đến mọi nhà" />
+                <Region HBox.hgrow="ALWAYS" />
+                <Label style="-fx-text-fill: #ecf0f1;" text="Liên hệ: contact@thuvien.com | Hotline: 1900 1234" />
             </HBox>
         </VBox>
-
+        </VBox>
     </VBox>
 </ScrollPane>

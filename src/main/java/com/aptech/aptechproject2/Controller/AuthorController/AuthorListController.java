@@ -2,6 +2,7 @@ package com.aptech.aptechproject2.Controller.AuthorController;
 
 import com.aptech.aptechproject2.DAO.AuthorDAO;
 import com.aptech.aptechproject2.Model.Author;
+import com.aptech.aptechproject2.Ulti.ImageUtil;
 import com.aptech.aptechproject2.Ulti.SceneManager;
 import com.aptech.aptechproject2.Ulti.Session;
 import javafx.collections.FXCollections;
@@ -48,25 +49,12 @@ public class AuthorListController {
                 if (empty || imagePath == null) {
                     setGraphic(null);
                 } else {
-                    Image image = loadImage(imagePath);
-                    if (image != null) {
-                        imageView.setImage(image);
-                        imageView.setFitWidth(50);  // Kích thước nhỏ trong table
-                        imageView.setFitHeight(50);
-                        imageView.setPreserveRatio(true);
-                        setGraphic(imageView);
-                        setText(null);
-                    } else {
-                        Image fallback = loadImage("/images/no_image.jpg");
-                        imageView.setImage(fallback != null ? fallback : null);
-                        imageView.setFitWidth(50);
-                        imageView.setFitHeight(50);
-                        imageView.setPreserveRatio(true);
-                        setGraphic(imageView);
-                        setText(null);
+                    ImageUtil.loadImageToView(imagePath, imageView);
                     }
+                    setGraphic(imageView);
+                    setText(null);
                 }
-            }
+
         });
         imageCol.setCellValueFactory(new PropertyValueFactory<>("image"));
 

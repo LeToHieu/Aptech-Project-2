@@ -99,7 +99,7 @@ public class BookDetailController {
         }
 
         try {
-            String path = "src/main/resources/com/aptech/aptechproject2/" + book.getImage();
+            String path = "src/main/resources/com/aptech/aptechproject2" + book.getImage();
             coverImage.setImage(new Image(new FileInputStream(path)));
         } catch (Exception e) {
             // ignore image load errors

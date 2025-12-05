@@ -1,4 +1,3 @@
-<!-- book_edit.fxml (Updated with TotalBook and BorrowBook fields) -->
 <?xml version="1.0" encoding="UTF-8"?>
 <?import javafx.scene.control.*?>
 <?import javafx.scene.layout.*?>
@@ -16,12 +15,6 @@
     <Label text="Mô tả:"/>
     <TextArea fx:id="descriptionField" promptText="Description" wrapText="true"/>
 
-    <Label text="Tổng Sách:"/>
-    <TextField fx:id="totalBookField" promptText="Total Books"/>
-
-    <Label text="Sách Mượn:"/>
-    <TextField fx:id="borrowBookField" promptText="Borrowed Books"/>
-
     <Label text="Hình ảnh:"/>
     <HBox spacing="10">
         <Button text="Chọn Hình Ảnh" onAction="#onChooseImage"/>
@@ -30,6 +23,11 @@
 
     <Label text="URL (Xem trước sách):"/>
     <TextField fx:id="urlField" promptText="URL"/>
+
+    <!-- Thêm sau phần URL, trước phần Tác giả -->
+    <Label text="Tổng số sách:"/>
+    <TextField fx:id="totalBookField" promptText="Số lượng tổng"/>
+
 
     <Label text="Tác giả:"/>
     <HBox spacing="10">
