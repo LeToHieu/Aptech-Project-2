@@ -266,4 +266,162 @@ public class BorrowDAO {
             try { if (conn != null) conn.setAutoCommit(true); conn.close(); } catch (SQLException ignored) {}
         }
     }
+
+    // Thêm vào BorrowDAO.java
+    public String getBorrowStatus(long userId, long bookId) {
+        String sql = """
+        SELECT status FROM borrow 
+        WHERE UserId = ? AND BookId = ? 
+        AND status IN (0, 1)  -- 0: pending, 1: đang mượn
+        ORDER BY BorrowDay DESC LIMIT 1
+        """;
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt("status") == 0 ? "PENDING" : "BORROWED";
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return "AVAILABLE";
+    }
+
+    // 0 = Pending (đang chờ duyệt), 1 = Đang mượn, 2 = Bị từ chối, 3 = Quá hạn, 4 = Đã trả
+
+    /**
+     * Người dùng gửi yêu cầu mượn sách
+     * → Tạo bản ghi borrow (status = 0)
+     * → Giảm ngay 1 cuốn trong kho (giữ chỗ)
+     */
+    public boolean createBorrowAndReserve(int userId, int bookId) {
+        String updateBook = "UPDATE book SET BorrowBook = BorrowBook + 1 WHERE Id = ? AND TotalBook > BorrowBook";
+        String insertBorrow = "INSERT INTO borrow (UserId, BookId, Status) VALUES (?, ?, 0)";
+
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // 1. Giữ chỗ trong kho
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setInt(1, bookId);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false; // Hết sách hoặc không tồn tại
+                }
+            }
+
+            // 2. Tạo yêu cầu mượn
+            try (PreparedStatement ps = conn.prepareStatement(insertBorrow)) {
+                ps.setInt(1, userId);
+                ps.setInt(2, bookId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) {
+                try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) {
+                try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+            }
+        }
+    }
+
+    // Thêm vào BorrowDAO.java
+    public boolean cancelPendingBorrow(long borrowId) {
+        String getBookId = "SELECT BookId FROM borrow WHERE Id = ? AND Status = 0";
+        String updateBook = "UPDATE book SET BorrowBook = BorrowBook - 1 WHERE Id = ?";
+        String deleteBorrow = "DELETE FROM borrow WHERE Id = ? AND Status = 0";
+
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            int bookId = -1;
+            try (PreparedStatement ps = conn.prepareStatement(getBookId)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) bookId = rs.getInt("BookId");
+                }
+            }
+
+            if (bookId == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            // Trả lại 1 cuốn vào kho
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setInt(1, bookId);
+                ps.executeUpdate();
+            }
+
+            // Xóa yêu cầu mượn
+            try (PreparedStatement ps = conn.prepareStatement(deleteBorrow)) {
+                ps.setLong(1, borrowId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) {}
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) {}
+        }
+    }
+
+    // Lấy danh sách mượn theo user
+    public List<Borrow> getBorrowsByUser(long userId) {
+        List<Borrow> list = new ArrayList<>();
+        String sql = """
+            SELECT b.*, u.UserName, bk.Title 
+            FROM borrow b
+            JOIN user u ON b.UserId = u.Id
+            JOIN book bk ON b.BookId = bk.Id
+            WHERE b.UserId = ?
+            ORDER BY b.BorrowDay DESC
+            """;
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Borrow borrow = extractBorrow(rs);
+                    list.add(borrow);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
+    }
+
+    private Borrow extractBorrow(ResultSet rs) throws SQLException {
+        Borrow b = new Borrow();
+        b.setId(rs.getLong("Id"));
+        b.setBorrowDay(rs.getTimestamp("BorrowDay"));
+        b.setExpireDay(rs.getTimestamp("ExpireDay"));
+        b.setReturnDateTime(rs.getTimestamp("ReturnDateTime"));
+        b.setUserId(rs.getLong("UserId"));
+        b.setBookId(rs.getLong("BookId"));
+        b.setStatus(rs.getInt("Status"));
+        b.setUserName(rs.getString("UserName"));
+        b.setBookTitle(rs.getString("Title"));
+        return b;
+    }
+
 }

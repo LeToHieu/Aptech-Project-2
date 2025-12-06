@@ -1,183 +1,226 @@
 package com.aptech.aptechproject2.Controller;
 
-import com.aptech.aptechproject2.DAO.AuthorDAO;
 import com.aptech.aptechproject2.DAO.BorrowDAO;
-import com.aptech.aptechproject2.DAO.CategoryDAO;
 import com.aptech.aptechproject2.DAO.ReviewDAO;
-import com.aptech.aptechproject2.Model.Author;
 import com.aptech.aptechproject2.Model.Book;
-import com.aptech.aptechproject2.Model.Category;
+import com.aptech.aptechproject2.Model.Review;
 import com.aptech.aptechproject2.Model.User;
+import com.aptech.aptechproject2.Ulti.ImageUtil;
 import com.aptech.aptechproject2.Ulti.Session;
 import javafx.concurrent.Task;
 import javafx.fxml.FXML;
-import javafx.scene.control.Alert;
-import javafx.scene.control.Button;
-import javafx.scene.control.Hyperlink;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextArea;
-import javafx.scene.image.Image;
+import javafx.geometry.Pos;
+import javafx.scene.control.*;
 import javafx.scene.image.ImageView;
-import javafx.stage.Stage;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Region;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Text;
 
-import java.io.FileInputStream;
+import java.awt.Desktop;
+import java.net.URI;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class BookDetailController {
 
-    @FXML private ImageView coverImage;
-    @FXML private Label titleLabel;
-    @FXML private Label idLabel;
-    @FXML private Label authorLabel;
-    @FXML private Label categoryLabel;
-    @FXML private Label ratingLabel;
-    @FXML private Hyperlink urlLink;
-    @FXML private TextArea descriptionArea;
-    @FXML private Button borrowBtn, addToShelvesBtn;
+    @FXML private Label titleLabel, descriptionLabel, authorsLabel, categoriesLabel;
+    @FXML private Label availabilityLabel, statusIcon;
+    @FXML private HBox ratingBox;
+    @FXML private ImageView bookImageView;
+    @FXML private VBox reviewsContainer;
+    @FXML private Button borrowButton;
 
     private Book book;
-
-    private final AuthorDAO authorDAO = new AuthorDAO();
-    private final CategoryDAO categoryDAO = new CategoryDAO();
-    private final ReviewDAO reviewDAO = new ReviewDAO();
-    private final BorrowDAO borrowDAO = new BorrowDAO();
+    private BorrowDAO borrowDAO = new BorrowDAO();
+    private ReviewDAO reviewDAO = new ReviewDAO();
 
     public void setBook(Book book) {
         this.book = book;
-        if (book == null) return;
-
-        titleLabel.setText(book.getTitle());
-        idLabel.setText(String.valueOf(book.getId()));
-        descriptionArea.setText(book.getDescription() == null ? "" : book.getDescription());
-
-        // load authors from DB
-        List<Author> authors = authorDAO.getAuthorsByBookId(book.getId());
-        if (authors != null && !authors.isEmpty()) {
-            String joined = authors.stream().map(Author::getName).collect(Collectors.joining(", "));
-            authorLabel.setText(joined);
-            book.setAuthors(authors);
-        } else {
-            authorLabel.setText("-");
-        }
-
-        // load categories
-        List<Category> categories = categoryDAO.getCategoriesByBookId(book.getId());
-        if (categories != null && !categories.isEmpty()) {
-            String joined = categories.stream().map(Category::getName).collect(Collectors.joining(", "));
-            categoryLabel.setText(joined);
-            book.setCategories(categories);
-        } else {
-            categoryLabel.setText("-");
-        }
-
-        // load average rating
-        double avg = reviewDAO.getAverageRatingForBook(book.getId());
-        book.setAverageRating(avg);
-        ratingLabel.setText(String.format("%.2f", avg));
-
-        // url
-        if (book.getUrl() != null && !book.getUrl().isEmpty()) {
-            urlLink.setText(book.getUrl());
-            urlLink.setOnAction(e -> {
-                try {
-                    String url = book.getUrl();
-                    String os = System.getProperty("os.name").toLowerCase();
-                    if (os.contains("win")) {
-                        new ProcessBuilder("rundll32", "url.dll,FileProtocolHandler", url).start();
-                    } else if (os.contains("mac")) {
-                        new ProcessBuilder("open", url).start();
-                    } else { // linux
-                        new ProcessBuilder("xdg-open", url).start();
-                    }
-                } catch (Exception ex) {
-                    ex.printStackTrace();
-                }
-            });
-        } else {
-            urlLink.setText("-");
-        }
-
-        try {
-            String path = "src/main/resources/com/aptech/aptechproject2" + book.getImage();
-            coverImage.setImage(new Image(new FileInputStream(path)));
-        } catch (Exception e) {
-            // ignore image load errors
-        }
+        loadBookInfo();
+        loadReviews();
+        updateBorrowButtonState();
     }
 
-    @FXML
-    private void onBorrow() {
-        User current = Session.getCurrentUser();
-        if (current == null) {
-            Alert a = new Alert(Alert.AlertType.WARNING);
-            a.setTitle("Chưa đăng nhập");
-            a.setHeaderText(null);
-            a.setContentText("Vui lòng đăng nhập để mượn sách.");
-            a.showAndWait();
+    private void loadBookInfo() {
+        titleLabel.setText(book.getTitle());
+        descriptionLabel.setText(book.getDescription() != null && !book.getDescription().isEmpty() ? book.getDescription() : "Chưa có mô tả.");
+
+        authorsLabel.setText(book.getAuthors().isEmpty() ? "Không rõ" :
+                book.getAuthors().stream().map(a -> a.getName()).collect(java.util.stream.Collectors.joining(", ")));
+
+        categoriesLabel.setText(book.getCategories().isEmpty() ? "Không rõ" :
+                book.getCategories().stream().map(c -> c.getName()).collect(java.util.stream.Collectors.joining(", ")));
+
+        int available = book.getTotalBook() - book.getBorrowBook();
+        availabilityLabel.setText(available + " cuốn còn lại");
+        if (available > 0) {
+            statusIcon.setText("Còn hàng");
+            statusIcon.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 20;");
+        } else {
+            statusIcon.setText("Hết sách");
+            statusIcon.setStyle("-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-padding: 8 16; -fx-background-radius: 20;");
+        }
+
+        // Rating
+        ratingBox.getChildren().clear();
+        double rating = book.getAverageRating();
+        int fullStars = (int) Math.round(rating);
+        for (int i = 0; i < 5; i++) {
+            Text star = new Text(i < fullStars ? "★" : "☆");
+            star.setStyle(i < fullStars ? "-fx-fill: #f39c12; -fx-font-size: 28px;" : "-fx-fill: #bdc3c7; -fx-font-size: 28px;");
+            ratingBox.getChildren().add(star);
+        }
+        if (rating > 0) {
+            Label score = new Label(String.format(" %.1f", rating));
+            score.setStyle("-fx-font-size: 20px; -fx-font-weight: bold;");
+            ratingBox.getChildren().add(score);
+        }
+
+        ImageUtil.loadImageToView(book.getImage(), bookImageView);
+    }
+
+    private void loadReviews() {
+        reviewsContainer.getChildren().clear();
+        List<Review> reviews = reviewDAO.getReviewsByBookId(book.getId());
+
+        if (reviews.isEmpty()) {
+            Label lbl = new Label("Chưa có đánh giá nào.");
+            lbl.setStyle("-fx-font-size: 16px; -fx-text-fill: #95a5a6;");
+            reviewsContainer.getChildren().add(lbl);
             return;
         }
 
-        borrowBtn.setDisable(true);
+        for (Review r : reviews) {
+            VBox box = new VBox(8);
+            box.setStyle("-fx-background-color: #fff; -fx-background-radius: 12; -fx-padding: 15; -fx-effect: dropshadow(gaussian, #00000011, 10, 0, 0, 3);");
 
-        Task<Long> task = new Task<>() {
-            @Override
-            protected Long call() {
-                // days default 14
-                return borrowDAO.createBorrow((int)current.getId(), book.getId(), 14);
+            HBox header = new HBox(10);
+            header.setAlignment(Pos.CENTER_LEFT);
+
+            Label user = new Label(r.getUserName());
+            user.setStyle("-fx-font-weight: bold;");
+
+            HBox stars = new HBox(3);
+            for (int i = 0; i < 5; i++) {
+                Text s = new Text(i < r.getRating() ? "★" : "☆");
+                s.setStyle(i < r.getRating() ? "-fx-fill: #f39c12;" : "-fx-fill: #bdc3c7;");
+                stars.getChildren().add(s);
+            }
+
+            Label date = new Label(r.getCreatedAt() != null ?
+                    DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm").format(r.getCreatedAt().toLocalDateTime()) : "");
+            date.setStyle("-fx-text-fill: #95a5a6;");
+
+            header.getChildren().addAll(user, stars, new Region() {{setPrefWidth(10);}}, date);
+            HBox.setHgrow(new Region(), javafx.scene.layout.Priority.ALWAYS);
+
+            Label comment = new Label(r.getComment());
+            comment.setWrapText(true);
+
+            box.getChildren().addAll(header, comment);
+            reviewsContainer.getChildren().add(box);
+        }
+    }
+
+    // Cập nhật trạng thái nút mượn
+    private void updateBorrowButtonState() {
+        User user = Session.getCurrentUser();
+        if (user == null) {
+            borrowButton.setText("Đăng nhập để mượn");
+            borrowButton.setDisable(true);
+            return;
+        }
+
+        Task<String> task = new Task<>() {
+            @Override protected String call() {
+                // Kiểm tra: có đơn nào đang pending hoặc đang mượn không?
+                return borrowDAO.getBorrowStatus(user.getId(), book.getId());
             }
         };
 
-        task.setOnSucceeded(evt -> {
-            long res = task.getValue();
-            borrowBtn.setDisable(false);
-            if (res > 0) {
-                Alert s = new Alert(Alert.AlertType.INFORMATION);
-                s.setTitle("Thành công");
-                s.setHeaderText(null);
-                s.setContentText("Mượn sách thành công!");
-                s.showAndWait();
-            } else if (res == -1) {
-                Alert w = new Alert(Alert.AlertType.WARNING);
-                w.setTitle("Đã mượn");
-                w.setHeaderText(null);
-                w.setContentText("Bạn đã đang mượn cuốn sách này.");
-                w.showAndWait();
-            } else if (res == -2) {
-                Alert e = new Alert(Alert.AlertType.ERROR);
-                e.setTitle("Hết sách");
-                e.setHeaderText(null);
-                e.setContentText("Không còn bản sách sẵn có để mượn.");
-                e.showAndWait();
-            } else {
-                Alert e = new Alert(Alert.AlertType.ERROR);
-                e.setTitle("Lỗi");
-                e.setHeaderText(null);
-                e.setContentText("Mượn sách thất bại (mã: " + res + "). Vui lòng thử lại.");
-                e.showAndWait();
-            }
-        });
+        task.setOnSucceeded(e -> {
+            String status = task.getValue();
+            int available = book.getTotalBook() - book.getBorrowBook();
 
-        task.setOnFailed(evt -> {
-            borrowBtn.setDisable(false);
-            Alert e = new Alert(Alert.AlertType.ERROR);
-            e.setTitle("Lỗi");
-            e.setHeaderText(null);
-            e.setContentText("Có lỗi khi thực hiện yêu cầu. Vui lòng thử lại sau.");
-            e.showAndWait();
+            if (available <= 0) {
+                borrowButton.setText("Hết sách");
+                borrowButton.setStyle("-fx-background-color: #7f8c8d; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;");
+                borrowButton.setDisable(true);
+            } else if ("PENDING".equals(status)) {
+                borrowButton.setText("Đã gửi yêu cầu mượn");
+                borrowButton.setStyle("-fx-background-color: #f39c12; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;");
+                borrowButton.setDisable(true);
+            } else if ("BORROWED".equals(status)) {
+                borrowButton.setText("Đang mượn sách này");
+                borrowButton.setStyle("-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;");
+                borrowButton.setDisable(true);
+            } else {
+                borrowButton.setText("Mượn sách");
+                borrowButton.setStyle("-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;");
+                borrowButton.setDisable(false);
+            }
         });
 
         new Thread(task).start();
     }
 
     @FXML
-    private void onAddToShelves() {
-        System.out.println("Add to shelves clicked for book id=" + (book == null ? "-" : book.getId()));
+    private void onBorrowBook() {
+        User user = Session.getCurrentUser();
+        if (user == null) return;
+
+        int available = book.getTotalBook() - book.getBorrowBook();
+        if (available <= 0) {
+            showAlert("Sách đã hết, không thể mượn!");
+            return;
+        }
+
+        Alert confirm = new Alert(Alert.AlertType.CONFIRMATION);
+        confirm.setTitle("Xác nhận mượn sách");
+        confirm.setHeaderText("Mượn: " + book.getTitle());
+        confirm.setContentText("Bạn sẽ được mượn trong 14 ngày.\nXác nhận gửi yêu cầu?");
+        if (confirm.showAndWait().orElse(ButtonType.CANCEL) != ButtonType.OK) return;
+
+        borrowButton.setText("Đang xử lý...");
+        borrowButton.setDisable(true);
+
+        Task<Boolean> task = new Task<>() {
+            @Override protected Boolean call() {
+                return borrowDAO.createBorrowAndReserve((int)user.getId(), book.getId());
+            }
+        };
+
+        task.setOnSucceeded(e -> {
+            if (task.getValue()) {
+                book.setBorrowBook(book.getBorrowBook() + 1); // Cập nhật UI ngay
+                showAlert("Gửi yêu cầu mượn thành công!\nVui lòng chờ quản trị viên duyệt.");
+                updateBorrowButtonState();
+            } else {
+                showAlert("Không thể gửi yêu cầu. Vui lòng thử lại.");
+                borrowButton.setDisable(false);
+            }
+        });
+
+        new Thread(task).start();
     }
 
     @FXML
-    private void onClose() {
-        Stage stage = (Stage) titleLabel.getScene().getWindow();
-        stage.close();
+    private void onPreviewPdf() {
+        if (book.getUrl() == null || book.getUrl().trim().isEmpty()) {
+            showAlert("Không có link xem trước cho sách này!");
+            return;
+        }
+        try {
+            Desktop.getDesktop().browse(new URI(book.getUrl()));
+        } catch (Exception e) {
+            showAlert("Không thể mở link: " + e.getMessage());
+        }
+    }
+
+    private void showAlert(String msg) {
+        Alert a = new Alert(Alert.AlertType.INFORMATION, msg);
+        a.showAndWait();
     }
 }

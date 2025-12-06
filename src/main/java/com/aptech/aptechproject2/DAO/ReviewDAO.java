@@ -30,16 +30,27 @@ public class ReviewDAO {
         return reviews;
     }
 
-    public List<Review> getReviewsByBookId(int bookId) {
+    public List<Review> getReviewsByBookId(long bookId) {
         List<Review> reviews = new ArrayList<>();
-        String sql = "SELECT r.*, u.UserName FROM review r JOIN `User` u ON r.UserId = u.Id WHERE r.BookId = ? ORDER BY r.CreateTime DESC";
+        String sql = """
+        SELECT r.*, u.UserName, b.Title
+        FROM Review r
+        JOIN `User` u ON r.UserId = u.Id
+        JOIN Book b ON r.BookId = b.Id
+        WHERE r.BookId = ?
+        ORDER BY r.CreateTime DESC
+        """;
         try (Connection c = DBUtil.getConnection();
              PreparedStatement ps = c.prepareStatement(sql)) {
-            ps.setInt(1, bookId);
+            ps.setLong(1, bookId);
             try (ResultSet rs = ps.executeQuery()) {
-                while (rs.next()) reviews.add(extractReview(rs));
+                while (rs.next()) {
+                    reviews.add(extractReview(rs));
+                }
             }
-        } catch (SQLException e) { e.printStackTrace(); }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
         return reviews;
     }
 
@@ -109,5 +120,6 @@ public class ReviewDAO {
         try { r.setBookTitle(rs.getString("Title")); } catch (Exception ignored) {}
         return r;
     }
+
 }
 

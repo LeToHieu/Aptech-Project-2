@@ -49,11 +49,26 @@ public class Borrow {
 
     public String getStatusName() {
         return switch (status) {
-            case 0 -> "Đang mượn";
-            case 1 -> "Đã trả";
-            case 2 -> "Quá hạn";
+            case 0 -> "Đang chờ duyệt";
+            case 1 -> "Đang mượn";
+            case 2 -> "Bị từ chối";
+            case 3 -> "Quá hạn";
+            case 4 -> "Đã trả";
             default -> "Không xác định";
         };
+    }
+
+    // Thêm vào class Borrow.java
+    public String getBorrowDayFormatted() {
+        return borrowDay != null ?
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                        .format(borrowDay.toLocalDateTime()) : "";
+    }
+
+    public String getExpireDayFormatted() {
+        return expireDay != null ?
+                java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
+                        .format(expireDay.toLocalDateTime()) : "";
     }
 
     @Override

@@ -1,144 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<?import javafx.scene.text.*?>
-<?import javafx.scene.image.*?>
-<?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
 <?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 
-<VBox xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
-      spacing="0" style="-fx-background-color: #f8f9fa;">
+<VBox spacing="30" style="-fx-padding: 30; -fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/25" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.aptech.aptechproject2.Controller.BookDetailController">
 
-    <!-- HEADER -->
-    <HBox style="-fx-background-color: white; -fx-border-color: #e0e0e0; -fx-border-width: 0 0 1 0;"
-          alignment="CENTER_LEFT" spacing="30" padding="15 40 15 40">
-        <Label text="THE BOOK HAVEN" style="-fx-font-family: 'Playfair Display'; -fx-font-size: 28px; -fx-font-weight: bold;" />
-        <HBox spacing="30" alignment="CENTER_LEFT" HBox.hgrow="ALWAYS">
-            <Label text="Home" style="-fx-font-size: 15px; -fx-text-fill: #333;" />
-            <Label text="Shop All Books" style="-fx-font-size: 15px; -fx-text-fill: #333;" />
-            <Label text="New Releases" style="-fx-font-size: 15px; -fx-text-fill: #333;" />
-            <Label text="Genres" style="-fx-font-size: 15px; -fx-text-fill: #333;" />
-            <Label text="Author Spotlight" style="-fx-font-size: 15px; -fx-text-fill: #333;" />
-        </HBox>
-        <HBox spacing="15" alignment="CENTER_RIGHT">
-            <Button text="Search" graphic="@">
-                <graphic>
-                    <ImageView fitWidth="20" fitHeight="20">
-                        <image>
-                            <Image url="@" />
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-            <Button text="Cart" graphic="@">
-                <graphic>
-                    <ImageView fitWidth="24" fitHeight="24">
-                        <image>
-                            <Image url="@" />
-                        </image>
-                    </ImageView>
-                </graphic>
-            </Button>
-        </HBox>
+    <!-- Tiêu đề sách -->
+    <Label fx:id="titleLabel" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" wrapText="true" />
+
+    <!-- Layout chính: 2 cột -->
+    <HBox spacing="40" alignment="TOP_LEFT">
+
+        <!-- Cột trái: Thông tin sách -->
+        <VBox spacing="15" prefWidth="600">
+            <VBox spacing="8">
+                <Label text="Mô tả:" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 16px; -fx-text-fill: #34495e; -fx-line-spacing: 4;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Tác giả:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #e67e22;" />
+                <Label fx:id="authorsLabel" wrapText="true" style="-fx-font-size: 15px;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Thể loại:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #3498db;" />
+                <Label fx:id="categoriesLabel" wrapText="true" style="-fx-font-size: 15px;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Tình trạng:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #27ae60;" />
+                <Label fx:id="availabilityLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                    <graphic>
+                        <Label fx:id="statusIcon" text="Available" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 5 12; -fx-background-radius: 20;" />
+                    </graphic>
+                </Label>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Đánh giá trung bình:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #f39c12;" />
+                <HBox fx:id="ratingBox" spacing="5" alignment="CENTER_LEFT" />
+            </VBox>
+        </VBox>
+
+        <!-- Cột phải: Ảnh bìa -->
+        <VBox alignment="CENTER">
+            <ImageView fx:id="bookImageView" fitWidth="350" fitHeight="500" preserveRatio="true"
+                       style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 5, 10);" />
+        </VBox>
     </HBox>
 
-    <!-- HERO SECTION -->
-    <StackPane prefHeight="550">
-        <ImageView fitWidth="1920" fitHeight="650" preserveRatio="false">
-            <image>
-                <Image url="@" /> <!-- Thay bằng ảnh thư viện đẹp của bạn -->
-            </image>
-        </ImageView>
-        <VBox alignment="CENTER" spacing="20" style="-fx-background-color: rgba(0,0,0,0.45);">
-            <Label text="THE BOOK HAVEN"
-                   style="-fx-font-family: 'Playfair Display'; -fx-font-size: 80px; -fx-text-fill: white; -fx-font-weight: bold;" />
-            <Label text="Discover Your Next Great Read"
-                   style="-fx-font-size: 28px; -fx-text-fill: #eee;" />
-            <HBox spacing="20" alignment="CENTER">
-                <Button text="QUICK LOOK" styleClass="btn-outline" prefWidth="180" prefHeight="50" />
-                <Button text="ADD TO CART" style="-fx-background-color: #e67e22; -fx-text-fill: white;"
-                        prefWidth="180" prefHeight="50" />
-            </HBox>
-        </VBox>
-    </StackPane>
+    <!-- Nút xem trước PDF -->
 
-    <!-- FEATURED BOOKS -->
-    <VBox spacing="40" alignment="CENTER" padding="60 40 60 40">
-        <Label text="FEATURED BOOKS" style="-fx-font-size: 32px; -fx-font-family: 'Playfair Display';"/>
-        <HBox spacing="30" alignment="CENTER">
-            <!-- Book 1 -->
-            <VBox spacing="15" alignment="CENTER">
-                <ImageView fitWidth="220" fitHeight="320" preserveRatio="true">
-                    <image><Image url="@" /></image>
-                </ImageView>
-                <Label text="Whispers of the Old Forest" style="-fx-font-weight: bold;" />
-                <Label text="Freya Moon / Epic Fantasy" style="-fx-text-fill: #777; -fx-font-size: 13px;" />
-                <HBox spacing="5"><Label text="★★★★★" style="-fx-text-fill: #f1c40f;"/></HBox>
-                <HBox spacing="10">
-                    <Button text="Quick Look" styleClass="btn-small" />
-                    <Button text="Add to Cart" style="-fx-background-color: #27ae60; -fx-text-fill: white;" styleClass="btn-small"/>
-                </HBox>
-            </VBox>
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Xem trước" onAction="#onPreviewPdf"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;" />
 
-            <!-- Book 2, 3, 4 - copy y chang, chỉ đổi ảnh + tên -->
-            <!-- (Mình rút gọn để bạn dễ copy, bạn nhân bản 3 cái nữa nhé) -->
-            <VBox spacing="15" alignment="CENTER"> ... </VBox>
-            <VBox spacing="15" alignment="CENTER"> ... </VBox>
-            <VBox spacing="15" alignment="CENTER"> ... </VBox>
-        </HBox>
+        <Button fx:id="borrowButton" text="Mượn sách" onAction="#onBorrowBook"
+                style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;" />
+    </HBox>
+
+    <!-- PHẦN ĐÁNH GIÁ - CUỘN RIÊNG -->
+    <VBox spacing="15">
+        <Label text="ĐÁNH GIÁ TỪ ĐỘC GIẢ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+        <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background: white; -fx-border-color: #ddd; -fx-border-radius: 10;">
+            <VBox fx:id="reviewsContainer" spacing="15" style="-fx-padding: 20;" />
+        </ScrollPane>
     </VBox>
 
-    <!-- TOP CATEGORIES -->
-    <VBox spacing="40" padding="60 40 60 40" style="-fx-background-color: #f1f2f6;">
-        <Label text="TOP CATEGORIES" style="-fx-font-size: 32px; -fx-font-family: 'Playfair Display';" alignment="CENTER"/>
-        <HBox spacing="60" alignment="CENTER">
-            <VBox spacing="15" alignment="CENTER">
-                <ImageView fitWidth="80" fitHeight="80"><image><Image url="@"/></image></ImageView>
-                <Label text="Fiction" />
-            </VBox>
-            <VBox spacing="15" alignment="CENTER">
-                <ImageView fitWidth="80" fitHeight="80"><image><Image url="@"/></image></ImageView>
-                <Label text="Non-Fiction" />
-            </VBox>
-            <!-- Thêm 4 cái nữa giống vậy -->
-        </HBox>
-    </VBox>
-
-    <!-- CUSTOMER REVIEWS -->
-    <VBox spacing="40" padding="60 40 60 40">
-        <Label text="CUSTOMER REVIEWS" style="-fx-font-size: 32px; -fx-font-family: 'Playfair Display';" alignment="CENTER"/>
-        <HBox spacing="50" alignment="CENTER">
-            <VBox spacing="15" alignment="CENTER">
-                <ImageView fitWidth="80" fitHeight="80">
-                    <image><Image url="@"/></image>
-                </ImageView>
-                <Label text="This is the best bookstore ever!" style="-fx-font-style: italic;" textAlignment="CENTER"/>
-                <Label text="— Sarah L." />
-                <Label text="★★★★★" style="-fx-text-fill: #f1c40f;"/>
-            </VBox>
-            <!-- 2 cái nữa giống vậy -->
-        </HBox>
-    </VBox>
-
-    <!-- FOOTER -->
-    <VBox style="-fx-background-color: #2c3e50; -fx-text-fill: white;" spacing="30" padding="50 40 50 40">
-        <HBox spacing="100">
-            <VBox spacing="10">
-                <Label text="About Us" style="-fx-font-size: 16px; -fx-font-weight: bold; -fx-text-fill: white;"/>
-                <Label text="Contact" style="-fx-text-fill: #bdc3c7;"/>
-                <Label text="FAQ" style="-fx-text-fill: #bdc3c7;"/>
-                <Label text="Privacy Policy" style="-fx-text-fill: #bdc3c7;"/>
-            </VBox>
-            <!-- Thêm 2-3 cột nữa nếu muốn -->
-        </HBox>
-        <Separator />
-        <HBox alignment="CENTER">
-            <Label text="© 2025 The Book Haven. All rights reserved." style="-fx-text-fill: #95a5a6;"/>
-        </HBox>
-    </VBox>
-
-    <!-- CSS STYLE -->
-    <stylesheets>
-
-    </stylesheets>
 </VBox>

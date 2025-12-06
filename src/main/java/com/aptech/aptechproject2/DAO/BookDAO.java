@@ -9,27 +9,28 @@ import com.aptech.aptechproject2.Ulti.DBUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class BookDAO {
 
-    public List<Book> getAllBooks() {
-        List<Book> books = new ArrayList<>();
-        String sql = "SELECT * FROM book ORDER BY CreateTime DESC";
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Book book = extractBook(rs);
-                book.setAuthors(getAuthorsForBook(book.getId()));
-                book.setCategories(getCategoriesForBook(book.getId()));
-                books.add(book);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return books;
-    }
+//    public List<Book> getAllBooks() {
+//        List<Book> books = new ArrayList<>();
+//        String sql = "SELECT * FROM book ORDER BY CreateTime DESC";
+//        try (Connection conn = DBUtil.getConnection();
+//             PreparedStatement ps = conn.prepareStatement(sql);
+//             ResultSet rs = ps.executeQuery()) {
+//            while (rs.next()) {
+//                Book book = extractBook(rs);
+//                book.setAuthors(getAuthorsForBook(book.getId()));
+//                book.setCategories(getCategoriesForBook(book.getId()));
+//                books.add(book);
+//            }
+//        } catch (SQLException e) {
+//            e.printStackTrace();
+//        }
+//        return books;
+//    }
 
     public List<Book> getLatestBooks(int limit) {
         List<Book> books = new ArrayList<>();
@@ -190,45 +191,51 @@ public class BookDAO {
 
 
 
-    private List<Author> getAuthorsForBook(int bookId) {
-        List<Author> authors = new ArrayList<>();
-        String sql = "SELECT a.* FROM author a JOIN bookauthor ba ON a.Id = ba.AuthorId WHERE ba.BookId = ?";
+    public List<Author> getAuthorsForBook(int bookId) {
+        List<Author> authors = new ArrayList<>();  // ← Khởi tạo ngay từ đầu
+        String sql = "SELECT a.* FROM author a " +
+                "JOIN bookauthor ba ON a.Id = ba.AuthorId " +
+                "WHERE ba.BookId = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, bookId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                authors.add(new Author(
-                        rs.getInt("Id"),
-                        rs.getString("Name"),
-                        rs.getString("Description"),
-                        rs.getString("Image")
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    authors.add(new Author(
+                            rs.getInt("Id"),
+                            rs.getString("Name"),
+                            rs.getString("Description"),
+                            rs.getString("Image")
+                    ));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return authors;
+        return authors; // ← Luôn trả về List rỗng nếu không có, không bao giờ null
     }
 
-    private List<Category> getCategoriesForBook(int bookId) {
-        List<Category> categories = new ArrayList<>();
-        String sql = "SELECT c.* FROM category c JOIN bookcategory bc ON c.Id = bc.CategoryId WHERE bc.BookId = ?";
+    public List<Category> getCategoriesForBook(int bookId) {
+        List<Category> categories = new ArrayList<>();  // ← Khởi tạo ngay từ đầu
+        String sql = "SELECT c.* FROM Category c " +
+                "JOIN bookcategory bc ON c.Id = bc.CategoryId " +
+                "WHERE bc.BookId = ?";
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, bookId);
-            ResultSet rs = ps.executeQuery();
-            while (rs.next()) {
-                categories.add(new Category(
-                        rs.getInt("Id"),
-                        rs.getString("Name"),
-                        rs.getString("Description")
-                ));
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    categories.add(new Category(
+                            rs.getInt("Id"),
+                            rs.getString("Name"),
+                            rs.getString("Description")
+                    ));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return categories;
+        return categories; // ← Luôn trả về List rỗng nếu không có
     }
 
     private void updateBookAuthors(Book book) throws SQLException {
@@ -499,18 +506,27 @@ public class BookDAO {
      */
     public List<Book> getTopRatedBooks(int limit) {
         List<Book> books = new ArrayList<>();
-        // LEFT JOIN để bao gồm cả sách chưa có review (rating trung bình = 0)
-        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
-                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
-                "GROUP BY b.Id " +
-                "ORDER BY averageRating DESC, b.Title ASC " +
-                "LIMIT ?";
+        String sql = """
+        SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating
+        FROM book b
+        LEFT JOIN review r ON b.Id = r.BookId
+        GROUP BY b.Id
+        ORDER BY averageRating DESC, b.Title ASC
+        LIMIT ?
+        """;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    books.add(extractBook(rs));
+                    Book book = extractBook(rs);
+                    book.setAverageRating(rs.getDouble("averageRating"));
+
+                    // DÒNG NÀY BẮT BUỘC PHẢI CÓ!!!
+                    book.setAuthors(getAuthorsForBook(book.getId()));
+                    book.setCategories(getCategoriesForBook(book.getId()));
+
+                    books.add(book);
                 }
             }
         } catch (SQLException e) {
@@ -519,24 +535,29 @@ public class BookDAO {
         return books;
     }
 
-    /**
-     * Lấy danh sách sách được mượn nhiều nhất.
-     * Sắp xếp theo trường BorrowBook giảm dần, có tính rating.
-     */
     public List<Book> getMostBorrowedBooks(int limit) {
         List<Book> books = new ArrayList<>();
-        // Lấy rating trung bình
-        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
-                "FROM book b LEFT JOIN review r ON b.Id = r.BookId " +
-                "GROUP BY b.Id " +
-                "ORDER BY b.BorrowBook DESC, b.Title ASC " +
-                "LIMIT ?";
+        String sql = """
+        SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating
+        FROM book b
+        LEFT JOIN review r ON b.Id = r.BookId
+        GROUP BY b.Id
+        ORDER BY b.BorrowBook DESC, b.Title ASC
+        LIMIT ?
+        """;
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, limit);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
-                    books.add(extractBook(rs));
+                    Book book = extractBook(rs);
+                    book.setAverageRating(rs.getDouble("averageRating"));
+
+                    // DÒNG NÀY BẮT BUỘC PHẢI CÓ!!!
+                    book.setAuthors(getAuthorsForBook(book.getId()));
+                    book.setCategories(getCategoriesForBook(book.getId()));
+
+                    books.add(book);
                 }
             }
         } catch (SQLException e) {
@@ -568,4 +589,103 @@ public class BookDAO {
         }
         return books;
     }
+
+    // BookDAO.java - Add these methods or update existing
+
+    public List<Book> getBooksByAuthor(int authorId) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b " +
+                "JOIN bookauthor ba ON b.Id = ba.BookId " +
+                "LEFT JOIN review r ON b.Id = r.BookId " +
+                "WHERE ba.AuthorId = ? " +
+                "GROUP BY b.Id " +
+                "ORDER BY b.CreateTime DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, authorId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Book book = extractBook(rs);
+                    book.setAuthors(getAuthorsForBook(book.getId()));
+                    book.setCategories(getCategoriesForBook(book.getId()));
+                    book.setAverageRating(rs.getDouble("averageRating"));
+                    books.add(book);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public List<Book> getRandomBooksByAuthor(int authorId, int limit) {
+        List<Book> allBooks = getBooksByAuthor(authorId);
+        if (allBooks.size() > limit) {
+            Collections.shuffle(allBooks);
+            return allBooks.subList(0, limit);
+        }
+        return allBooks;
+    }
+
+    public List<Book> getBooksByCategory(int categoryId) {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b " +
+                "JOIN bookcategory bc ON b.Id = bc.BookId " +
+                "LEFT JOIN review r ON b.Id = r.BookId " +
+                "WHERE bc.CategoryId = ? " +
+                "GROUP BY b.Id " +
+                "ORDER BY b.CreateTime DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, categoryId);
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Book book = extractBook(rs);
+                    book.setAuthors(getAuthorsForBook(book.getId()));
+                    book.setCategories(getCategoriesForBook(book.getId()));
+                    book.setAverageRating(rs.getDouble("averageRating"));
+                    books.add(book);
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+    public List<Book> getRandomBooksByCategory(int categoryId, int limit) {
+        List<Book> allBooks = getBooksByCategory(categoryId);
+        if (allBooks.size() > limit) {
+            Collections.shuffle(allBooks);
+            return allBooks.subList(0, limit);
+        }
+        return allBooks;
+    }
+
+    public List<Book> getAllBooks() {
+        List<Book> books = new ArrayList<>();
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b " +
+                "LEFT JOIN review r ON b.Id = r.BookId " +
+                "GROUP BY b.Id " +
+                "ORDER BY b.CreateTime DESC";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Book book = extractBook(rs);
+                book.setAuthors(getAuthorsForBook(book.getId()));
+                book.setCategories(getCategoriesForBook(book.getId()));
+                book.setAverageRating(rs.getDouble("averageRating"));
+                books.add(book);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return books;
+    }
+
+
 }

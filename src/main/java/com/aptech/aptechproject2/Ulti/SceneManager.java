@@ -2,11 +2,14 @@ package com.aptech.aptechproject2.Ulti;
 
 import com.aptech.aptechproject2.Model.User;
 import javafx.fxml.FXMLLoader;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.scene.control.Alert;
 import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.Pane;
+import javafx.scene.layout.Region;
+import javafx.stage.Modality;
 import javafx.stage.Stage;
 
 import java.io.IOException;
@@ -53,6 +56,38 @@ public class SceneManager {
             e.printStackTrace();
             new Alert(Alert.AlertType.ERROR, "Lỗi tải Content FXML: " + fxmlPath).show();
             return null;
+        }
+    }
+
+    public static void loadInto(Pane container, String fxmlPath) {
+        try {
+            Node node = FXMLLoader.load(SceneManager.class.getResource(fxmlPath));
+            container.getChildren().clear();
+            container.getChildren().add(node);
+            // Bind size
+            if (node instanceof Region region) {
+                region.prefWidthProperty().bind(container.widthProperty());
+                region.prefHeightProperty().bind(container.heightProperty());
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            new Alert(Alert.AlertType.ERROR, "Lỗi tải content: " + e.getMessage()).show();
+        }
+    }
+
+    public static void openModal(String fxmlPath, Object data) {
+        // Implement nếu cần mở modal cho book_detail
+        try {
+            FXMLLoader loader = new FXMLLoader(SceneManager.class.getResource(fxmlPath));
+            Parent root = loader.load();
+            // Nếu có data, set cho controller
+
+            Stage stage = new Stage();
+            stage.setScene(new Scene(root));
+            stage.initModality(Modality.APPLICATION_MODAL);
+            stage.showAndWait();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 
