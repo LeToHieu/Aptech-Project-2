@@ -16,3 +16,86 @@
     -fx-font-weight: bold;
 }
 
+/* Root */
+.root-pane {
+    -fx-background-color: linear-gradient(to bottom right, #ffffff 0%, #f6f9ff 100%);
+    -fx-padding: 20;
+    -fx-font-family: "Segoe UI", "Arial", sans-serif;
+    -fx-alignment: top_center;
+}
+
+/* Header */
+.header-box { -fx-alignment: center; -fx-spacing: 6; }
+.header {
+    -fx-font-size: 20px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #1f2937;
+}
+.subtle {
+    -fx-text-fill: #6b7280;
+    -fx-font-size: 12px;
+}
+
+/* Profile row */
+.profile-row { -fx-padding: 8 0 0 0; -fx-alignment: center-left; }
+.avatar {
+    -fx-effect: dropshadow(gaussian, rgba(0,0,0,0.12), 8, 0.0, 0, 2);
+    -fx-background-radius: 999px;
+    -fx-clip: null;
+}
+
+/* Username label */
+.username {
+    -fx-font-size: 14px;
+    -fx-font-weight: 600;
+    -fx-text-fill: #111827;
+}
+
+/* Form grid tweaks */
+.form-grid {
+    -fx-padding: 6 0 0 0;
+}
+
+/* Text fields and password */
+.text-field, .password-field {
+    -fx-background-color: white;
+    -fx-border-color: #e6e9ef;
+    -fx-border-width: 1;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-padding: 8 10 8 10;
+    -fx-focus-color: #4f46e5;
+    -fx-faint-focus-color: transparent;
+    -fx-font-size: 13px;
+}
+
+/* Buttons default */
+.button {
+    -fx-cursor: hand;
+    -fx-padding: 8 14 8 14;
+    -fx-border-radius: 8;
+    -fx-background-radius: 8;
+    -fx-font-weight: 600;
+}
+
+/* Primary button */
+.primary-btn {
+    -fx-background-color: linear-gradient(#4f46e5, #4338ca);
+    -fx-text-fill: white;
+    -fx-border-color: transparent;
+    -fx-effect: dropshadow(gaussian, rgba(79,70,229,0.18), 6, 0.0, 0, 2);
+}
+
+/* Ghost / link style */
+.ghost-btn {
+    -fx-background-color: transparent;
+    -fx-border-color: transparent;
+    -fx-text-fill: #374151;
+    -fx-font-weight: 600;
+}
+
+/* Actions HBox */
+.actions {
+    -fx-padding: 8 0 0 0;
+    -fx-alignment: center-right;
+}
