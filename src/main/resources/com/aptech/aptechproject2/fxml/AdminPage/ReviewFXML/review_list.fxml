@@ -9,11 +9,8 @@
             <Label text="QUẢN LÝ ĐÁNH GIÁ" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
             <HBox spacing="10">
                 <TextField fx:id="searchField" promptText="Tìm theo người dùng/sách..." HBox.hgrow="ALWAYS"/>
-                <Button fx:id="addBtn" text="Thêm" onAction="#onAdd"/>
-                <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
                 <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Đăng xuất" onAction="#onLogout" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
             </HBox>
         </VBox>
     </top>

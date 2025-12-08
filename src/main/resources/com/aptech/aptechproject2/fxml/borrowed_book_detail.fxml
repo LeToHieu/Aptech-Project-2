@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.image.ImageView?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox spacing="30" style="-fx-padding: 30; -fx-background-color: #f8f9fa;" xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+      fx:controller="com.aptech.aptechproject2.Controller.BorrowedBookDetailController">
+
+    <!-- Tiêu đề sách -->
+    <Label fx:id="titleLabel" style="-fx-font-size: 32px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" wrapText="true" />
+
+    <!-- Layout chính: 2 cột -->
+    <HBox spacing="40" alignment="TOP_LEFT">
+
+        <!-- Cột trái: Thông tin sách -->
+        <VBox spacing="15" prefWidth="600">
+            <VBox spacing="8">
+                <Label text="Mô tả:" style="-fx-font-size: 18px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+                <Label fx:id="descriptionLabel" wrapText="true" style="-fx-font-size: 16px; -fx-text-fill: #34495e; -fx-line-spacing: 4;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Tác giả:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #e67e22;" />
+                <Label fx:id="authorsLabel" wrapText="true" style="-fx-font-size: 15px;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Thể loại:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #3498db;" />
+                <Label fx:id="categoriesLabel" wrapText="true" style="-fx-font-size: 15px;" />
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Tình trạng:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #27ae60;" />
+                <Label fx:id="availabilityLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;">
+                    <graphic>
+                        <Label fx:id="statusIcon" text="Available" style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-padding: 5 12; -fx-background-radius: 20;" />
+                    </graphic>
+                </Label>
+            </VBox>
+
+            <VBox spacing="8">
+                <Label text="Đánh giá trung bình:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #f39c12;" />
+                <HBox fx:id="ratingBox" spacing="5" alignment="CENTER_LEFT" />
+            </VBox>
+
+            <!-- New: Borrow info -->
+            <VBox spacing="8">
+                <Label text="Thông tin mượn:" style="-fx-font: 16px 'System Bold'; -fx-text-fill: #8e44ad;" />
+                <Label fx:id="borrowDayLabel" style="-fx-font-size: 15px;" />
+                <Label fx:id="expireDayLabel" style="-fx-font-size: 15px;" />
+                <Label fx:id="daysLeftLabel" style="-fx-font-size: 15px; -fx-font-weight: bold;" />
+            </VBox>
+        </VBox>
+
+        <!-- Cột phải: Ảnh bìa -->
+        <VBox alignment="CENTER">
+            <ImageView fx:id="bookImageView" fitWidth="350" fitHeight="500" preserveRatio="true"
+                       style="-fx-effect: dropshadow(gaussian, rgba(0,0,0,0.3), 20, 0, 5, 10);" />
+        </VBox>
+    </HBox>
+
+    <!-- Nút xem trước PDF và Trả sách -->
+    <HBox spacing="20" alignment="CENTER">
+        <Button text="Xem trước" onAction="#onPreviewPdf"
+                style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;" />
+
+        <Button fx:id="borrowButton" text="Trả sách" onAction="#onReturnBook"
+                style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-size: 16px; -fx-padding: 12 12; -fx-background-radius: 50; -fx-font-weight: bold;" />
+    </HBox>
+
+    <!-- PHẦN ĐÁNH GIÁ - CUỘN RIÊNG -->
+    <VBox spacing="15">
+        <Label text="ĐÁNH GIÁ TỪ ĐỘC GIẢ" style="-fx-font-size: 24px; -fx-font-weight: bold; -fx-text-fill: #2c3e50;" />
+
+        <ScrollPane fitToWidth="true" prefHeight="200" style="-fx-background: white; -fx-border-color: #ddd; -fx-border-radius: 10;">
+            <VBox fx:id="reviewsContainer" spacing="15" style="-fx-padding: 20;" />
+        </ScrollPane>
+    </VBox>
+
+</VBox>

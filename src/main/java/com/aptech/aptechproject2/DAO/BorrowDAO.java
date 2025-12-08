@@ -108,29 +108,6 @@ public class BorrowDAO {
         }
     }
 
-    public List<Borrow> getAllBorrows() {
-        List<Borrow> list = new ArrayList<>();
-        String sql = "SELECT b.Id, b.BorrowDay, b.ExpireDay, b.ReturnDateTime, b.UserId, b.BookId, b.Status, u.UserName, bk.Title " +
-                "FROM borrow b LEFT JOIN `user` u ON b.UserId = u.Id LEFT JOIN book bk ON b.BookId = bk.Id ORDER BY b.BorrowDay DESC";
-        try (Connection c = DBUtil.getConnection(); PreparedStatement ps = c.prepareStatement(sql); ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                Borrow br = new Borrow();
-                br.setId(rs.getLong("Id"));
-                br.setBorrowDay(rs.getTimestamp("BorrowDay"));
-                br.setExpireDay(rs.getTimestamp("ExpireDay"));
-                br.setReturnDateTime(rs.getTimestamp("ReturnDateTime"));
-                br.setUserId(rs.getLong("UserId"));
-                br.setBookId(rs.getLong("BookId"));
-                br.setStatus(rs.getInt("Status"));
-                try { br.setUserName(rs.getString("UserName")); } catch (Exception ignored) {}
-                try { br.setBookTitle(rs.getString("Title")); } catch (Exception ignored) {}
-                list.add(br);
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return list;
-    }
 
     public boolean create(long userId, long bookId) {
         long id = createBorrow((int)userId, (int)bookId, 14);
@@ -388,7 +365,7 @@ public class BorrowDAO {
     public List<Borrow> getBorrowsByUser(long userId) {
         List<Borrow> list = new ArrayList<>();
         String sql = """
-            SELECT b.*, u.UserName, bk.Title 
+            SELECT b.*, u.UserName, bk.Title, bk.Description AS BookDescription
             FROM borrow b
             JOIN user u ON b.UserId = u.Id
             JOIN book bk ON b.BookId = bk.Id
@@ -410,6 +387,57 @@ public class BorrowDAO {
         return list;
     }
 
+    // New method: Return a borrowed book
+    public boolean returnBorrow(long borrowId) {
+        String getBookId = "SELECT BookId FROM borrow WHERE Id = ? AND (Status = 1 OR Status = 3)";
+        String updateBorrow = "UPDATE borrow SET Status = 4, ReturnDateTime = NOW() WHERE Id = ? AND (Status = 1 OR Status = 3)";
+        String updateBook = "UPDATE book SET BorrowBook = BorrowBook - 1 WHERE Id = ?";
+
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            int bookId = -1;
+            try (PreparedStatement ps = conn.prepareStatement(getBookId)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) bookId = rs.getInt("BookId");
+                }
+            }
+
+            if (bookId == -1) {
+                conn.rollback();
+                return false;
+            }
+
+            // Update borrow status and return date
+            try (PreparedStatement ps = conn.prepareStatement(updateBorrow)) {
+                ps.setLong(1, borrowId);
+                int rows = ps.executeUpdate();
+                if (rows == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // Decrease borrowed count in book
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setInt(1, bookId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) {}
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) {}
+        }
+    }
+
     private Borrow extractBorrow(ResultSet rs) throws SQLException {
         Borrow b = new Borrow();
         b.setId(rs.getLong("Id"));
@@ -421,7 +449,194 @@ public class BorrowDAO {
         b.setStatus(rs.getInt("Status"));
         b.setUserName(rs.getString("UserName"));
         b.setBookTitle(rs.getString("Title"));
+        b.setBookDescription(rs.getString("BookDescription"));  // New field
         return b;
+    }
+
+    public boolean approveBorrow(long borrowId, long librarianId, int days) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // Kiểm tra trạng thái phải là 0 (Pending)
+            String checkSql = "SELECT Status FROM borrow WHERE Id = ? FOR UPDATE";
+            try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next() || rs.getInt(1) != 0) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            // Cập nhật mượn thành công: Status = 1, đặt ngày mượn + hạn trả
+            String sql = "UPDATE borrow SET Status = 1, BorrowDay = NOW(), ExpireDay = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE Id = ? AND Status = 0";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, days);
+                ps.setLong(2, borrowId);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ignored) {}
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ignored) {}
+        }
+    }
+
+    /**
+     * Từ chối yêu cầu mượn (Status 0 -> 2) và hoàn lại BorrowBook.
+     * PHƯƠNG THỨC NÀY CHỈ NÊN ĐƯỢC GỌI KHI Status = 0.
+     */
+    public boolean rejectBorrow(long borrowId) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+            long bookId = 0;
+
+            // 1. Lấy BookId và kiểm tra Status (Nên là 0)
+            String selectSql = "SELECT BookId, Status FROM borrow WHERE Id = ? FOR UPDATE";
+            try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        bookId = rs.getLong("BookId");
+                        if (rs.getInt("Status") != 0) {
+                            conn.rollback();
+                            return false; // Chỉ từ chối khi Pending (0)
+                        }
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            // 2. Cập nhật bản ghi mượn: Status = 2 (Bị từ chối)
+            String updateBorrow = "UPDATE borrow SET Status = 2, ReturnDateTime = NOW() WHERE Id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateBorrow)) {
+                ps.setLong(1, borrowId);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 3. Giảm BorrowBook (hoàn lại sách trong kho)
+            String updateBook = "UPDATE book SET BorrowBook = BorrowBook - 1 WHERE Id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setLong(1, bookId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    /**
+     * Trả sách (Status 1/3 -> 4) và hoàn lại BorrowBook.
+     */
+    public boolean returnBook(long borrowId, long userId) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+            long bookId = 0;
+
+            // 1. Lấy BookId và kiểm tra trạng thái hợp lệ (1: Đang mượn hoặc 3: Quá hạn)
+            String selectSql = "SELECT BookId, Status FROM borrow WHERE Id = ? FOR UPDATE";
+            try (PreparedStatement ps = conn.prepareStatement(selectSql)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        bookId = rs.getLong("BookId");
+                        int currentStatus = rs.getInt("Status");
+                        // Chỉ cho phép trả sách khi đang mượn (1) hoặc quá hạn (3)
+                        if (currentStatus != 1 && currentStatus != 3) {
+                            conn.rollback();
+                            return false;
+                        }
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            // 2. Cập nhật bản ghi mượn: Status = 4 (Đã trả), đặt ReturnDateTime
+            String updateBorrow = "UPDATE borrow SET ReturnDateTime = NOW(), Status = 4 WHERE Id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateBorrow)) {
+                ps.setLong(1, borrowId);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            // 3. Giảm BorrowBook (hoàn lại sách trong kho)
+            String updateBook = "UPDATE book SET BorrowBook = BorrowBook - 1 WHERE Id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setLong(1, bookId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ex) { ex.printStackTrace(); }
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException e) { e.printStackTrace(); }
+        }
+    }
+
+    public List<Borrow> getAllBorrows() {
+        List<Borrow> list = new ArrayList<>();
+        String sql = """
+        SELECT b.*, u.UserName, bk.Title as bookTitle 
+        FROM borrow b 
+        JOIN user u ON b.UserId = u.Id 
+        JOIN book bk ON b.BookId = bk.Id 
+        ORDER BY b.BorrowDay DESC
+        """;
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql);
+             ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                Borrow b = new Borrow();
+                b.setId(rs.getLong("Id"));
+                b.setBorrowDay(rs.getTimestamp("BorrowDay"));
+                b.setExpireDay(rs.getTimestamp("ExpireDay"));
+                b.setReturnDateTime(rs.getTimestamp("ReturnDateTime"));
+                b.setUserId(rs.getLong("UserId"));
+                b.setBookId(rs.getLong("BookId"));
+                b.setStatus(rs.getInt("Status"));
+                b.setUserName(rs.getString("UserName"));
+                b.setBookTitle(rs.getString("bookTitle"));
+                list.add(b);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return list;
     }
 
 }

@@ -7,29 +7,28 @@
     <top>
         <VBox spacing="10" style="-fx-padding: 15; -fx-background-color: #f8f9fa;">
             <Label text="QUẢN LÝ MƯỢN SÁCH" style="-fx-font-size: 20; -fx-font-weight: bold;"/>
-            <HBox spacing="10" alignment="CENTER_LEFT">
-                <ComboBox fx:id="userCombo" prefWidth="200" promptText="Chọn người dùng"/>
-                <ComboBox fx:id="bookCombo" prefWidth="250" promptText="Chọn sách"/>
-                <Button fx:id="borrowBtn" text="Mượn" onAction="#onBorrow" style="-fx-background-color: #28a745; -fx-text-fill: white;"/>
-                <Button fx:id="returnBtn" text="Trả" onAction="#onReturn" style="-fx-background-color: #ffc107;"/>
-                <Button fx:id="editBtn" text="Sửa" onAction="#onEdit"/>
-                <Button fx:id="deleteBtn" text="Xóa" onAction="#onDelete"/>
-                <Button text="Làm mới" onAction="#onRefresh"/>
+            <HBox spacing="12" alignment="CENTER_LEFT">
+                <Button fx:id="approveBtn" text="Duyệt mượn" onAction="#onApprove"
+                        style="-fx-background-color: #27ae60; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button fx:id="rejectBtn" text="Từ chối" onAction="#onReject"
+                        style="-fx-background-color: #e74c3c; -fx-text-fill: white; -fx-font-weight: bold;"/>
+                <Button fx:id="returnBtn" text="Nhận trả sách" onAction="#onReturn"
+                        style="-fx-background-color: #3498db; -fx-text-fill: white; -fx-font-weight: bold;"/>
                 <Region HBox.hgrow="ALWAYS"/>
-                <Button text="Đăng xuất" onAction="#onLogout" style="-fx-background-color: #dc3545; -fx-text-fill: white;"/>
+                <Button text="Làm mới" onAction="#onRefresh"/>
             </HBox>
         </VBox>
     </top>
     <center>
         <TableView fx:id="borrowTable" prefHeight="500">
             <columns>
-                <TableColumn fx:id="idCol" text="ID" prefWidth="50"/>
+                <TableColumn fx:id="idCol" text="ID" prefWidth="60"/>
                 <TableColumn fx:id="userCol" text="Người mượn" prefWidth="150"/>
-                <TableColumn fx:id="bookCol" text="Sách" prefWidth="200"/>
-                <TableColumn fx:id="borrowDayCol" text="Ngày mượn" prefWidth="140"/>
+                <TableColumn fx:id="bookCol" text="Sách" prefWidth="250"/>
+                <TableColumn fx:id="borrowDayCol" text="Ngày yêu cầu" prefWidth="140"/>
                 <TableColumn fx:id="expireDayCol" text="Hạn trả" prefWidth="140"/>
                 <TableColumn fx:id="returnDayCol" text="Ngày trả" prefWidth="140"/>
-                <TableColumn fx:id="statusCol" text="Trạng thái" prefWidth="100"/>
+                <TableColumn fx:id="statusCol" text="Trạng thái" prefWidth="120"/>
             </columns>
         </TableView>
     </center>

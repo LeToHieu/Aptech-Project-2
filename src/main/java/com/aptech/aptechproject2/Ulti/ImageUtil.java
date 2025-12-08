@@ -2,6 +2,7 @@ package com.aptech.aptechproject2.Ulti;
 
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
+import javafx.scene.shape.Rectangle;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 
@@ -88,6 +89,35 @@ public class ImageUtil {
                 e.printStackTrace(); // Optional: Log lỗi
             }
         }
+    }
+
+
+    public static ImageView createRoundedImageView(String imagePath, double width, double height, double radius) {
+        String fallbackPath = IMAGE_DIR + "no_image.jpg";
+
+        // Resolve real image path
+        String filename = (imagePath != null && !imagePath.isEmpty())
+                ? imagePath.substring(imagePath.lastIndexOf("/") + 1)
+                : "no_image.jpg";
+
+        File file = new File(IMAGE_DIR + filename);
+        Image image = file.exists()
+                ? new Image("file:" + file.getAbsolutePath(), width, height, false, true)
+                : new Image("file:" + fallbackPath, width, height, false, true);
+
+        // ImageView
+        ImageView imageView = new ImageView(image);
+        imageView.setFitWidth(width);
+        imageView.setFitHeight(height);
+        imageView.setPreserveRatio(false);
+
+        // Rounded clip (best practice)
+        Rectangle clip = new Rectangle(width, height);
+        clip.setArcWidth(radius * 2);
+        clip.setArcHeight(radius * 2);
+        imageView.setClip(clip);
+
+        return imageView;
     }
 }
 

@@ -687,5 +687,171 @@ public class BookDAO {
         return books;
     }
 
+    public Book getBookById(int id) {
+        String sql = "SELECT b.*, COALESCE(AVG(r.Rating), 0) AS averageRating " +
+                "FROM book b " +
+                "LEFT JOIN review r ON b.Id = r.BookId " +
+                "WHERE b.Id = ? " +
+                "GROUP BY b.Id";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, id);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    Book book = extractBook(rs);
+                    book.setAuthors(getAuthorsForBook(book.getId()));
+                    book.setCategories(getCategoriesForBook(book.getId()));
+                    book.setAverageRating(rs.getDouble("averageRating"));
+                    return book;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    // === DUYỆT MƯỢN SÁCH (Pending → Đang mượn) ===
+    public boolean approveBorrow(long borrowId, long librarianId, int days) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // Kiểm tra trạng thái phải là 0 (Pending)
+            String checkSql = "SELECT Status FROM borrow WHERE Id = ? FOR UPDATE";
+            try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (!rs.next() || rs.getInt(1) != 0) {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            // Cập nhật mượn thành công: Status = 1, đặt ngày mượn + hạn trả
+            String sql = "UPDATE borrow SET Status = 1, BorrowDay = NOW(), ExpireDay = DATE_ADD(NOW(), INTERVAL ? DAY) WHERE Id = ? AND Status = 0";
+            try (PreparedStatement ps = conn.prepareStatement(sql)) {
+                ps.setInt(1, days);
+                ps.setLong(2, borrowId);
+                if (ps.executeUpdate() == 0) {
+                    conn.rollback();
+                    return false;
+                }
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            if (conn != null) try { conn.rollback(); } catch (SQLException ignored) {}
+            e.printStackTrace();
+            return false;
+        } finally {
+            if (conn != null) try { conn.setAutoCommit(true); conn.close(); } catch (SQLException ignored) {}
+        }
+    }
+
+    // === TỪ CHỐI MƯỢN SÁCH (Pending → Bị từ chối) ===
+    public boolean rejectBorrow(long borrowId) {
+        String sql = "UPDATE borrow SET Status = 2, ReturnDateTime = NOW() WHERE Id = ? AND Status = 0";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, borrowId);
+            return ps.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
+    // === TRẢ SÁCH (Đang mượn hoặc Quá hạn → Đã trả) ===
+    public boolean returnBook(long borrowId, long librarianId) {
+        Connection conn = null;
+        try {
+            conn = DBUtil.getConnection();
+            conn.setAutoCommit(false);
+
+            // Kiểm tra trạng thái hợp lệ: chỉ trả khi là 1 (đang mượn) hoặc 3 (quá hạn)
+            String checkSql = "SELECT Status, BookId FROM borrow WHERE Id = ? FOR UPDATE";
+            int currentStatus = -1;
+            long bookId = 0;
+
+            try (PreparedStatement ps = conn.prepareStatement(checkSql)) {
+                ps.setLong(1, borrowId);
+                try (ResultSet rs = ps.executeQuery()) {
+                    if (rs.next()) {
+                        currentStatus = rs.getInt("Status");
+                        bookId = rs.getLong("BookId");
+                    } else {
+                        conn.rollback();
+                        return false;
+                    }
+                }
+            }
+
+            if (currentStatus != 1 && currentStatus != 3) {
+                conn.rollback();
+                return false; // Không phải trạng thái được phép trả
+            }
+
+            // Cập nhật trạng thái trả sách
+            String updateBorrow = "UPDATE borrow SET Status = 4, ReturnDateTime = NOW(), LibrarianId = ? WHERE Id = ?";
+            try (PreparedStatement ps = conn.prepareStatement(updateBorrow)) {
+                ps.setLong(1, librarianId);
+                ps.setLong(2, borrowId);
+                ps.executeUpdate();
+            }
+
+            // Tăng số sách có sẵn (nếu dùng bảng book_inventory thì sửa ở đây)
+            // Nếu bạn dùng cột BorrowBook trong bảng book:
+            String updateBook = "UPDATE book SET BorrowBook = BorrowBook - 1 WHERE Id = ? AND BorrowBook > 0";
+            try (PreparedStatement ps = conn.prepareStatement(updateBook)) {
+                ps.setLong(1, bookId);
+                ps.executeUpdate();
+            }
+
+            conn.commit();
+            return true;
+        } catch (SQLException e) {
+            e.printStackTrace();
+            try { if (conn != null) conn.rollback(); } catch (SQLException ignored) {}
+            return false;
+        } finally {
+            try { if (conn != null) { conn.setAutoCommit(true); conn.close(); } } catch (SQLException ignored) {}
+        }
+    }
+
+    // === TỰ ĐỘNG CẬP NHẬT QUÁ HẠN (nên gọi định kỳ, ví dụ mỗi ngày 1 lần) ===
+    public void updateOverdueStatus() {
+        String sql = "UPDATE borrow SET Status = 3 WHERE Status = 1 AND ExpireDay < NOW()";
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    // === KIỂM TRA NGƯỜI DÙNG CÓ THỂ MƯỢN SÁCH NÀY KHÔNG ===
+    public boolean canUserBorrowBook(long userId, long bookId) {
+        String sql = """
+        SELECT COUNT(*) FROM borrow 
+        WHERE UserId = ? AND BookId = ? AND Status IN (0,1,3)
+        """;
+        try (Connection c = DBUtil.getConnection();
+             PreparedStatement ps = c.prepareStatement(sql)) {
+            ps.setLong(1, userId);
+            ps.setLong(2, bookId);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    return rs.getInt(1) == 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 
 }

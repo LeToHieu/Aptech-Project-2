@@ -12,6 +12,7 @@ public class Borrow {
     private int status; // 0: Đang mượn, 1: Đã trả, 2: Quá hạn
     private String userName;
     private String bookTitle;
+    private String bookDescription;
 
     // Constructors
     public Borrow() {}
@@ -58,6 +59,17 @@ public class Borrow {
         };
     }
 
+    public String getStatusColor() {
+        return switch (status) {
+            case 0 -> "#f39c12"; // Vàng - chờ duyệt
+            case 1 -> "#3498db"; // Xanh dương - đang mượn
+            case 2 -> "#e74c3c"; // Đỏ - từ chối
+            case 3 -> "#e67e22"; // Cam - quá hạn
+            case 4 -> "#27ae60"; // Xanh lá - đã trả
+            default -> "#7f8c8d";
+        };
+    }
+
     // Thêm vào class Borrow.java
     public String getBorrowDayFormatted() {
         return borrowDay != null ?
@@ -70,6 +82,10 @@ public class Borrow {
                 java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm")
                         .format(expireDay.toLocalDateTime()) : "";
     }
+
+    public String getBookDescription() {
+        return bookDescription; }
+    public void setBookDescription(String bookDescription) { this.bookDescription = bookDescription; }
 
     @Override
     public String toString() {

@@ -1,168 +1,138 @@
 package com.aptech.aptechproject2.Controller.BorrwController;
 
-import com.aptech.aptechproject2.DAO.BorrowDAO;
 import com.aptech.aptechproject2.DAO.BookDAO;
-import com.aptech.aptechproject2.DAO.UserDAO;
+import com.aptech.aptechproject2.DAO.BorrowDAO;
 import com.aptech.aptechproject2.Model.Borrow;
-import com.aptech.aptechproject2.Model.Book;
-import com.aptech.aptechproject2.Model.User;
 import com.aptech.aptechproject2.Ulti.SceneManager;
 import com.aptech.aptechproject2.Ulti.Session;
+import javafx.beans.property.SimpleStringProperty;
 import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
-import javafx.fxml.FXMLLoader;
-import javafx.scene.Scene;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.stage.Modality;
-import javafx.stage.Stage;
-import java.sql.Timestamp;
 
-import java.io.IOException;
+import java.sql.Timestamp;
 import java.util.List;
 
 public class BorrowListController {
 
     @FXML private TableView<Borrow> borrowTable;
-    @FXML private TableColumn<Borrow, Integer> idCol;
-    @FXML private TableColumn<Borrow, String> userCol, bookCol, borrowDayCol, expireDayCol, returnDayCol, statusCol;
-    @FXML private ComboBox<User> userCombo;
-    @FXML private ComboBox<Book> bookCombo;
-    @FXML private Button borrowBtn, returnBtn, editBtn, deleteBtn;
+    @FXML private TableColumn<Borrow, Long> idCol;
+    @FXML private TableColumn<Borrow, String> userCol, bookCol, statusCol, borrowDayCol, expireDayCol, returnDayCol;
 
-    private final BorrowDAO borrowDAO = new BorrowDAO();
-    private final UserDAO userDAO = new UserDAO();
+    @FXML private Button approveBtn;
+    @FXML private Button rejectBtn;
+    @FXML private Button returnBtn;
+
     private final BookDAO bookDAO = new BookDAO();
+    private final BorrowDAO borrowDAO = new BorrowDAO();
 
     @FXML
-    private void initialize() {
+    public void initialize() {
+        setupTableColumns();
+        loadBorrows();
+
+        // Tự động ẩn/hiện nút theo dòng được chọn
+        borrowTable.getSelectionModel().selectedItemProperty().addListener((obs, oldVal, newVal) -> {
+            if (newVal == null) {
+                approveBtn.setVisible(false);
+                rejectBtn.setVisible(false);
+                returnBtn.setVisible(false);
+                return;
+            }
+
+            int status = newVal.getStatus();
+            approveBtn.setVisible(status == 0);        // Chỉ hiện khi đang chờ duyệt
+            rejectBtn.setVisible(status == 0);         // Chỉ hiện khi đang chờ duyệt
+            returnBtn.setVisible(status == 1 || status == 3); // Chỉ hiện khi đang mượn hoặc quá hạn
+        });
+    }
+
+    private void setupTableColumns() {
         idCol.setCellValueFactory(new PropertyValueFactory<>("id"));
         userCol.setCellValueFactory(new PropertyValueFactory<>("userName"));
         bookCol.setCellValueFactory(new PropertyValueFactory<>("bookTitle"));
-        borrowDayCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-                cell.getValue().getBorrowDay().toString()));
-        expireDayCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-                cell.getValue().getExpireDay().toString()));
-        returnDayCol.setCellValueFactory(cell -> {
-            Timestamp rt = cell.getValue().getReturnDateTime();
-            return new javafx.beans.property.SimpleStringProperty(rt != null ? rt.toString() : "-");
-        });
-        statusCol.setCellValueFactory(cell -> new javafx.beans.property.SimpleStringProperty(
-                cell.getValue().getStatusName()));
 
+        borrowDayCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getBorrowDayFormatted()));
+        expireDayCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getExpireDayFormatted()));
+        returnDayCol.setCellValueFactory(cellData -> {
+            Timestamp rt = cellData.getValue().getReturnDateTime();
+            return new SimpleStringProperty(rt != null
+                    ? rt.toLocalDateTime().format(java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm"))
+                    : "");
+        });
+        statusCol.setCellValueFactory(cellData ->
+                new SimpleStringProperty(cellData.getValue().getStatusName()));
+    }
+
+    // DUYỆT MƯỢN
+    @FXML
+    private void onApprove() {
+        Borrow selected = getSelectedBorrow();
+        if (selected == null || selected.getStatus() != 0) return;
+
+        if (SceneManager.confirm("Duyệt phiếu mượn sách:\n" + selected.getBookTitle() + "\nCho: " + selected.getUserName())) {
+            long librarianId = Session.getCurrentUser().getId();
+            if (borrowDAO.approveBorrow(selected.getId(), librarianId, 14)) {
+                SceneManager.success("Đã duyệt mượn sách thành công!");
+                loadBorrows();
+            } else {
+                SceneManager.alert("Duyệt thất bại! Có thể sách đã hết hoặc lỗi hệ thống.");
+            }
+        }
+    }
+
+    // TỪ CHỐI
+    @FXML
+    private void onReject() {
+        Borrow selected = getSelectedBorrow();
+        if (selected == null || selected.getStatus() != 0) return;
+
+        if (SceneManager.confirm("Từ chối phiếu mượn này?")) {
+            if (borrowDAO.rejectBorrow(selected.getId())) {
+                SceneManager.success("Đã từ chối phiếu mượn!");
+                loadBorrows();
+            } else {
+                SceneManager.alert("Từ chối thất bại!");
+            }
+        }
+    }
+
+    // TRẢ SÁCH
+    @FXML
+    private void onReturn() {
+        Borrow selected = getSelectedBorrow();
+        if (selected == null || (selected.getStatus() != 1 && selected.getStatus() != 3)) return;
+
+        if (SceneManager.confirm("Xác nhận nhận lại sách:\n" + selected.getBookTitle() + "\nTừ: " + selected.getUserName())) {
+            long librarianId = Session.getCurrentUser().getId();
+            if (borrowDAO.returnBook(selected.getId(), librarianId)) {
+                SceneManager.success("Nhận trả sách thành công!");
+                loadBorrows();
+            } else {
+                SceneManager.alert("Trả sách thất bại!");
+            }
+        }
+    }
+
+    @FXML
+    private void onRefresh() {
         loadBorrows();
-        loadUsersAndBooks();
+    }
+
+    // Helper
+    private Borrow getSelectedBorrow() {
+        Borrow selected = borrowTable.getSelectionModel().getSelectedItem();
+        if (selected == null) {
+            SceneManager.alert("Vui lòng chọn một phiếu mượn!");
+        }
+        return selected;
     }
 
     private void loadBorrows() {
-        borrowDAO.updateOverdueStatus(); // Cập nhật quá hạn
         List<Borrow> borrows = borrowDAO.getAllBorrows();
         borrowTable.setItems(FXCollections.observableArrayList(borrows));
-    }
-
-    private void loadUsersAndBooks() {
-        userCombo.setItems(FXCollections.observableArrayList(userDAO.getAllUsers()));
-        bookCombo.setItems(FXCollections.observableArrayList(bookDAO.getAllBooks()));
-        userCombo.setPromptText("Chọn người dùng");
-        bookCombo.setPromptText("Chọn sách");
-    }
-
-    @FXML
-    private void onBorrow() {
-        User user = userCombo.getValue();
-        Book book = bookCombo.getValue();
-        if (user == null || book == null) {
-            alert("Vui lòng chọn người dùng và sách!");
-            return;
-        }
-        if (confirm("Xác nhận mượn sách cho " + user.getUsername() + "?")) {
-            if (borrowDAO.create(user.getId(), book.getId())) {
-                success("Mượn sách thành công! Hạn trả: 14 ngày");
-                loadBorrows();
-                userCombo.setValue(null);
-                bookCombo.setValue(null);
-            } else {
-                alert("Mượn thất bại!");
-            }
-        }
-    }
-
-    @FXML
-    private void onReturn() {
-        Borrow selected = borrowTable.getSelectionModel().getSelectedItem();
-        if (selected == null || selected.getStatus() != 0) {
-            alert("Vui lòng chọn một phiếu đang mượn!");
-            return;
-        }
-        if (confirm("Xác nhận trả sách: " + selected.getBookTitle() + "?")) {
-            if (borrowDAO.returnBook(selected.getId())) {
-                success("Trả sách thành công!");
-                loadBorrows();
-            } else {
-                alert("Trả sách thất bại!");
-            }
-        }
-    }
-
-    @FXML
-    private void onRefresh() { loadBorrows(); }
-
-    @FXML
-    private void onLogout() {
-        Session.clear();
-        SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", borrowTable.getScene());
-    }
-
-    private void alert(String msg) { new Alert(Alert.AlertType.WARNING, msg).show(); }
-    private void success(String msg) { new Alert(Alert.AlertType.INFORMATION, msg).show(); }
-    private boolean confirm(String msg) {
-        return new Alert(Alert.AlertType.CONFIRMATION, msg, ButtonType.OK, ButtonType.CANCEL)
-                .showAndWait().filter(ButtonType.OK::equals).isPresent();
-    }
-
-    @FXML
-    private void onEdit() {
-        Borrow selected = borrowTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            alert("Vui lòng chọn phiếu mượn!");
-            return;
-        }
-        if (selected.getStatus() != 0) {
-            alert("Chỉ có thể sửa phiếu đang mượn!");
-            return;
-        }
-
-        try {
-            FXMLLoader loader = new FXMLLoader(getClass().getResource("/com/aptech/aptechproject2/fxml/AdminPage/BorrowFXML/borrow_edit.fxml"));
-            Scene scene = new Scene(loader.load());
-            EditBorrowController controller = loader.getController();
-            controller.setBorrow(selected);
-            Stage stage = new Stage();
-            stage.setTitle("Sửa Phiếu Mượn");
-            stage.initModality(Modality.APPLICATION_MODAL);
-            stage.setScene(scene);
-            stage.showAndWait();
-            loadBorrows();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @FXML
-    private void onDelete() {
-        Borrow selected = borrowTable.getSelectionModel().getSelectedItem();
-        if (selected == null) {
-            alert("Vui lòng chọn phiếu mượn!");
-            return;
-        }
-
-        if (confirm("Xóa phiếu mượn này? Không thể khôi phục!")) {
-            if (borrowDAO.delete(selected.getId())) {  // DÙNG DAO
-                success("Xóa thành công!");
-                loadBorrows();
-            } else {
-                alert("Xóa thất bại! Có thể phiếu đã bị xóa hoặc lỗi DB.");
-            }
-        }
     }
 }
