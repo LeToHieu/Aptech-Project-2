@@ -29,7 +29,7 @@ public class UserDashboardController {
         navProfile.setOnAction(e -> loadPage("/com/aptech/aptechproject2/fxml/user_profile.fxml"));
 
         btnLogout.setOnAction(e -> {
-            Session.clear();
+                Session.clear();
             SceneManager.loadScene("/com/aptech/aptechproject2/fxml/login.fxml", btnLogout.getScene());
         });
 

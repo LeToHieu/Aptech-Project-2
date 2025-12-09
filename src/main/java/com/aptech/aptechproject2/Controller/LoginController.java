@@ -28,7 +28,7 @@ public class LoginController {
 
         User user = userDAO.getByUsername(username);
         if (user != null && BCrypt.checkpw(password, user.getPassword())) {
-            Session.setCurrentUser(user); // Sửa từ SceneManager → Session (đồng bộ với Dashboard)
+            Session.setCurrentUser(user); // Sửa từ SceneManager → Session 
             // Phân trang theo role (sửa logic cho đúng với getRoleName: 1=Admin → admin_dashboard, 0=User hoặc 2=Librarian → user_dashboard)
             int role = user.getRole();
             if (role == 2|| role == 1) {
